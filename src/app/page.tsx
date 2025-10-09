@@ -25,7 +25,7 @@ export default function Dashboard() {
     totalRevenue: 0,
   });
 
-  const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [monthlyData, setMonthlyData] = useState<{ month: string; revenue: number }[]>([]);
   const [storageInfo, setStorageInfo] = useState({
     usedBytes: 0,
     usedKB: 0,

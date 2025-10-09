@@ -17,7 +17,7 @@ export interface StorageInfo {
 export function getLocalStorageSize(): number {
   let total = 0;
   
-  for (let key in localStorage) {
+  for (const key in localStorage) {
     if (localStorage.hasOwnProperty(key)) {
       // Calculate size of key + value
       // Each character is typically 2 bytes in UTF-16

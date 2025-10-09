@@ -20,7 +20,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableFooter,
 } from '@/components/ui/table';
 import { productService } from '@/lib/productService';
 import { invoiceService } from '@/lib/invoiceService';
