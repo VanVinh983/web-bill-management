@@ -25,6 +25,7 @@ import { productService } from '@/lib/productService';
 import { invoiceService } from '@/lib/invoiceService';
 import { Product, Invoice, InvoiceItem } from '@/types/models';
 import { formatCurrency } from '@/lib/formatters';
+import { formatNumberInput, handleNumberInputChange } from '@/lib/numberFormat';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -132,22 +133,12 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
   const handleSubmit = () => {
     // Validation
     if (!formData.customerName.trim()) {
-      alert('Customer name is required');
-      return;
-    }
-
-    if (!formData.customerPhone.trim()) {
-      alert('Customer phone is required');
-      return;
-    }
-
-    if (!formData.customerAddress.trim()) {
-      alert('Customer address is required');
+      alert('Vui lòng nhập tên khách hàng');
       return;
     }
 
     if (items.length === 0) {
-      alert('Please add at least one product');
+      alert('Vui lòng thêm ít nhất một sản phẩm');
       return;
     }
 
@@ -212,13 +203,13 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="customerPhone" className="text-sm font-medium">Số điện thoại *</Label>
+                <Label htmlFor="customerPhone" className="text-sm font-medium">Số điện thoại</Label>
                 <Input
                   id="customerPhone"
                   type="tel"
                   value={formData.customerPhone}
                   onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
-                  placeholder="Nhập số điện thoại"
+                  placeholder="Nhập số điện thoại (không bắt buộc)"
                   className="h-11 lg:h-10 text-base"
                 />
               </div>
@@ -235,12 +226,12 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="customerAddress" className="text-sm font-medium">Địa chỉ *</Label>
+              <Label htmlFor="customerAddress" className="text-sm font-medium">Địa chỉ</Label>
               <Input
                 id="customerAddress"
                 value={formData.customerAddress}
                 onChange={(e) => setFormData({ ...formData, customerAddress: e.target.value })}
-                placeholder="Nhập địa chỉ khách hàng"
+                placeholder="Nhập địa chỉ khách hàng (không bắt buộc)"
                 className="h-11 lg:h-10 text-base"
               />
             </div>
@@ -394,10 +385,11 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
                 <Label htmlFor="shipFee" className="text-sm font-medium">Phí ship</Label>
                 <Input
                   id="shipFee"
-                  type="number"
-                  min="0"
-                  value={formData.shipFee}
-                  onChange={(e) => setFormData({ ...formData, shipFee: e.target.value })}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatNumberInput(formData.shipFee)}
+                  onChange={(e) => handleNumberInputChange(e.target.value, (val: string) => setFormData({ ...formData, shipFee: val }))}
+                  placeholder="0"
                   className="h-11 lg:h-10 text-base"
                 />
               </div>
@@ -405,10 +397,11 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
                 <Label htmlFor="discountOrDeposit" className="text-sm font-medium">Giảm giá/Cọc</Label>
                 <Input
                   id="discountOrDeposit"
-                  type="number"
-                  min="0"
-                  value={formData.discountOrDeposit}
-                  onChange={(e) => setFormData({ ...formData, discountOrDeposit: e.target.value })}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatNumberInput(formData.discountOrDeposit)}
+                  onChange={(e) => handleNumberInputChange(e.target.value, (val: string) => setFormData({ ...formData, discountOrDeposit: val }))}
+                  placeholder="0"
                   className="h-11 lg:h-10 text-base"
                 />
               </div>

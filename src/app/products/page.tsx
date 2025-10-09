@@ -33,6 +33,7 @@ import { productService } from '@/lib/productService';
 import { categoryService } from '@/lib/categoryService';
 import { Product, Category } from '@/types/models';
 import { formatCurrency, formatDate } from '@/lib/formatters';
+import { formatNumberInput, handleNumberInputChange } from '@/lib/numberFormat';
 import { Plus, Pencil, Trash2, Package, Filter } from 'lucide-react';
 
 function ProductsContent() {
@@ -392,9 +393,10 @@ function ProductsContent() {
                 <Label htmlFor="costPrice" className="text-sm font-medium">Giá vốn *</Label>
                 <Input
                   id="costPrice"
-                  type="number"
-                  value={formData.costPrice}
-                  onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatNumberInput(formData.costPrice)}
+                  onChange={(e) => handleNumberInputChange(e.target.value, (val: string) => setFormData({ ...formData, costPrice: val }))}
                   placeholder="0"
                   className="h-11 text-base"
                 />
@@ -404,9 +406,10 @@ function ProductsContent() {
                 <Label htmlFor="salePrice" className="text-sm font-medium">Giá bán *</Label>
                 <Input
                   id="salePrice"
-                  type="number"
-                  value={formData.salePrice}
-                  onChange={(e) => setFormData({ ...formData, salePrice: e.target.value })}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatNumberInput(formData.salePrice)}
+                  onChange={(e) => handleNumberInputChange(e.target.value, (val: string) => setFormData({ ...formData, salePrice: val }))}
                   placeholder="0"
                   className="h-11 text-base"
                 />
@@ -416,9 +419,10 @@ function ProductsContent() {
                 <Label htmlFor="stockQuantity" className="text-sm font-medium">Tồn kho *</Label>
                 <Input
                   id="stockQuantity"
-                  type="number"
-                  value={formData.stockQuantity}
-                  onChange={(e) => setFormData({ ...formData, stockQuantity: e.target.value })}
+                  type="text"
+                  inputMode="numeric"
+                  value={formatNumberInput(formData.stockQuantity)}
+                  onChange={(e) => handleNumberInputChange(e.target.value, (val: string) => setFormData({ ...formData, stockQuantity: val }))}
                   placeholder="0"
                   className="h-11 text-base"
                 />
