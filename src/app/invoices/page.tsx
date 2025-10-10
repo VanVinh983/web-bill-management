@@ -32,15 +32,16 @@ export default function InvoicesPage() {
     loadInvoices();
   }, []);
 
-  const loadInvoices = () => {
-    setInvoices(invoiceService.getAll().sort((a, b) => b.id - a.id));
+  const loadInvoices = async () => {
+    const data = await invoiceService.getAll();
+    setInvoices(data.sort((a, b) => b.id - a.id));
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (deleteConfirm === id) {
-      invoiceService.delete(id);
+      await invoiceService.delete(id);
       setDeleteConfirm(null);
-      loadInvoices();
+      await loadInvoices();
     } else {
       setDeleteConfirm(id);
       setTimeout(() => setDeleteConfirm(null), 3000);

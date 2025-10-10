@@ -56,18 +56,24 @@ function ProductsContent() {
   });
 
   useEffect(() => {
-    loadProducts();
-    setCategories(categoryService.getAll());
+    loadData();
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadData = async () => {
+    await loadProducts();
+    const cats = await categoryService.getAll();
+    setCategories(cats);
     
     // Check if there's a categoryId in URL params
     const categoryIdParam = searchParams.get('categoryId');
     if (categoryIdParam) {
       setFilterCategoryId(categoryIdParam);
     }
-  }, [searchParams]);
+  };
 
-  const loadProducts = () => {
-    setProducts(productService.getAll());
+  const loadProducts = async () => {
+    const data = await productService.getAll();
+    setProducts(data);
   };
 
   const handleOpenDialog = (product?: Product) => {
@@ -97,7 +103,7 @@ function ProductsContent() {
     setIsDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validation
     if (!formData.name.trim()) {
       alert('Product name is required');
@@ -153,20 +159,20 @@ function ProductsContent() {
     };
 
     if (editingProduct) {
-      productService.update(editingProduct.id, productData);
+      await productService.update(editingProduct.id, productData);
     } else {
-      productService.create(productData);
+      await productService.create(productData);
     }
 
     setIsDialogOpen(false);
-    loadProducts();
+    await loadProducts();
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (deleteConfirm === id) {
-      productService.delete(id);
+      await productService.delete(id);
       setDeleteConfirm(null);
-      loadProducts();
+      await loadProducts();
     } else {
       setDeleteConfirm(id);
       setTimeout(() => setDeleteConfirm(null), 3000);

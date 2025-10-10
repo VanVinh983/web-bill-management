@@ -21,12 +21,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { productService } from '@/lib/productService';
+import { categoryService } from '@/lib/categoryService';
 import { invoiceService } from '@/lib/invoiceService';
-import { Product, Invoice, InvoiceItem } from '@/types/models';
+import { Product, Invoice, InvoiceItem, Category } from '@/types/models';
 import { formatCurrency } from '@/lib/formatters';
 import { formatNumberInput, handleNumberInputChange } from '@/lib/numberFormat';
-import { Plus, Trash2, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, ArrowLeft, PackagePlus } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface InvoiceFormProps {
@@ -36,6 +45,9 @@ interface InvoiceFormProps {
 export function InvoiceForm({ invoice }: InvoiceFormProps) {
   const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isQuickAddDialogOpen, setIsQuickAddDialogOpen] = useState(false);
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   
   const [formData, setFormData] = useState({
     orderDate: invoice?.orderDate 
@@ -57,8 +69,23 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
     quantity: '1',
   });
 
+  const [quickProductForm, setQuickProductForm] = useState({
+    name: '',
+    categoryId: '',
+    salePrice: '',
+    costPrice: '',
+  });
+
   useEffect(() => {
-    setProducts(productService.getAll());
+    const loadData = async () => {
+      const [productsData, categoriesData] = await Promise.all([
+        productService.getAll(),
+        categoryService.getAll()
+      ]);
+      setProducts(productsData);
+      setCategories(categoriesData);
+    };
+    loadData();
   }, []);
 
   const handleAddItem = () => {
@@ -130,7 +157,69 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
     return { subtotal, shipFee, discountOrDeposit, total };
   };
 
-  const handleSubmit = () => {
+  const handleQuickAddProduct = async () => {
+    // Validation
+    if (!quickProductForm.name.trim()) {
+      alert('Vui lòng nhập tên sản phẩm');
+      return;
+    }
+
+    if (!quickProductForm.categoryId) {
+      alert('Vui lòng chọn danh mục');
+      return;
+    }
+
+    const salePrice = parseFloat(quickProductForm.salePrice);
+    if (isNaN(salePrice) || salePrice <= 0) {
+      alert('Vui lòng nhập giá bán hợp lệ');
+      return;
+    }
+
+    const costPrice = parseFloat(quickProductForm.costPrice);
+    if (isNaN(costPrice) || costPrice <= 0) {
+      alert('Vui lòng nhập giá gốc hợp lệ');
+      return;
+    }
+
+    setIsCreatingProduct(true);
+
+    try {
+      // Create product with minimal required fields
+      const newProduct = await productService.create({
+        name: quickProductForm.name.trim(),
+        categoryId: parseInt(quickProductForm.categoryId),
+        salePrice,
+        costPrice,
+        stockQuantity: 0, // Default stock quantity
+        note: '',
+        expirationDate: '',
+      });
+
+      // Refresh products list
+      const updatedProducts = await productService.getAll();
+      setProducts(updatedProducts);
+
+      // Auto-select the newly created product
+      setNewItem({ ...newItem, productId: newProduct.id.toString() });
+
+      // Reset form and close dialog
+      setQuickProductForm({
+        name: '',
+        categoryId: '',
+        salePrice: '',
+        costPrice: '',
+      });
+      setIsQuickAddDialogOpen(false);
+
+      alert('Tạo sản phẩm thành công!');
+    } catch (error) {
+      alert('Lỗi khi tạo sản phẩm: ' + error);
+    } finally {
+      setIsCreatingProduct(false);
+    }
+  };
+
+  const handleSubmit = async () => {
     // Validation
     if (!formData.customerName.trim()) {
       alert('Vui lòng nhập tên khách hàng');
@@ -157,10 +246,10 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
 
     try {
       if (invoice) {
-        invoiceService.update(invoice.id, invoiceData);
+        await invoiceService.update(invoice.id, invoiceData);
         alert('Invoice updated successfully!');
       } else {
-        const newInvoice = invoiceService.create(invoiceData);
+        const newInvoice = await invoiceService.create(invoiceData);
         alert(`Invoice created successfully! Invoice ID: ${newInvoice.id}`);
       }
       router.push('/invoices');
@@ -247,21 +336,32 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
             <div className="grid grid-cols-1 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="product" className="text-sm font-medium">Sản phẩm</Label>
-                <Select
-                  value={newItem.productId}
-                  onValueChange={(value) => setNewItem({ ...newItem, productId: value })}
-                >
-                  <SelectTrigger className="h-11 text-base">
-                    <SelectValue placeholder="Chọn sản phẩm" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map((product) => (
-                      <SelectItem key={product.id} value={product.id.toString()}>
-                        {product.name} - {formatCurrency(product.salePrice)} (Tồn: {product.stockQuantity})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select
+                    value={newItem.productId}
+                    onValueChange={(value) => setNewItem({ ...newItem, productId: value })}
+                  >
+                    <SelectTrigger className="h-11 text-base">
+                      <SelectValue placeholder="Chọn sản phẩm" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {products.map((product) => (
+                        <SelectItem key={product.id} value={product.id.toString()}>
+                          {product.name} - {formatCurrency(product.salePrice)} (Tồn: {product.stockQuantity})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsQuickAddDialogOpen(true)}
+                    className="h-11 shrink-0"
+                    title="Tạo sản phẩm nhanh"
+                  >
+                    <PackagePlus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
@@ -437,6 +537,118 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Quick Add Product Dialog */}
+      <Dialog open={isQuickAddDialogOpen} onOpenChange={setIsQuickAddDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Tạo sản phẩm nhanh</DialogTitle>
+            <DialogDescription>
+              Nhập thông tin cơ bản để tạo sản phẩm mới. Bạn có thể cập nhật đầy đủ thông tin sau.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="quickProductName" className="text-sm font-medium">
+                Tên sản phẩm <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="quickProductName"
+                value={quickProductForm.name}
+                onChange={(e) => setQuickProductForm({ ...quickProductForm, name: e.target.value })}
+                placeholder="Nhập tên sản phẩm"
+                className="h-11 text-base"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="quickProductCategory" className="text-sm font-medium">
+                Danh mục <span className="text-red-500">*</span>
+              </Label>
+              <Select
+                value={quickProductForm.categoryId}
+                onValueChange={(value) => setQuickProductForm({ ...quickProductForm, categoryId: value })}
+              >
+                <SelectTrigger className="h-11 text-base">
+                  <SelectValue placeholder="Chọn danh mục" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="quickProductSalePrice" className="text-sm font-medium">
+                  Giá bán <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="quickProductSalePrice"
+                  type="text"
+                  inputMode="numeric"
+                  value={formatNumberInput(quickProductForm.salePrice)}
+                  onChange={(e) => handleNumberInputChange(
+                    e.target.value, 
+                    (val: string) => setQuickProductForm({ ...quickProductForm, salePrice: val })
+                  )}
+                  placeholder="0"
+                  className="h-11 text-base"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="quickProductCostPrice" className="text-sm font-medium">
+                  Giá gốc <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="quickProductCostPrice"
+                  type="text"
+                  inputMode="numeric"
+                  value={formatNumberInput(quickProductForm.costPrice)}
+                  onChange={(e) => handleNumberInputChange(
+                    e.target.value, 
+                    (val: string) => setQuickProductForm({ ...quickProductForm, costPrice: val })
+                  )}
+                  placeholder="0"
+                  className="h-11 text-base"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsQuickAddDialogOpen(false);
+                setQuickProductForm({
+                  name: '',
+                  categoryId: '',
+                  salePrice: '',
+                  costPrice: '',
+                });
+              }}
+              disabled={isCreatingProduct}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="button"
+              onClick={handleQuickAddProduct}
+              disabled={isCreatingProduct}
+            >
+              {isCreatingProduct ? 'Đang tạo...' : 'Tạo sản phẩm'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -12,13 +12,16 @@ export default function EditInvoicePage() {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
-    const id = parseInt(params.id as string);
-    const foundInvoice = invoiceService.getById(id);
-    if (foundInvoice) {
-      setInvoice(foundInvoice);
-    } else {
-      router.push('/invoices');
-    }
+    const loadInvoice = async () => {
+      const id = parseInt(params.id as string);
+      const foundInvoice = await invoiceService.getById(id);
+      if (foundInvoice) {
+        setInvoice(foundInvoice);
+      } else {
+        router.push('/invoices');
+      }
+    };
+    loadInvoice();
   }, [params.id, router]);
 
   if (!invoice) {

@@ -1,46 +1,30 @@
 import { Category } from '@/types/models';
-import { getFromStorage, saveToStorage, getNextId, STORAGE_KEYS } from './localStorage';
+import { firestoreService, COLLECTIONS } from './firestoreService';
+
+const COUNTER_NAME = 'category_counter';
 
 export const categoryService = {
-  getAll(): Category[] {
-    return getFromStorage<Category>(STORAGE_KEYS.CATEGORIES);
+  async getAll(): Promise<Category[]> {
+    return firestoreService.getAll<Category>(COLLECTIONS.CATEGORIES);
   },
 
-  getById(id: number): Category | undefined {
-    const categories = this.getAll();
-    return categories.find(c => c.id === id);
+  async getById(id: number): Promise<Category | null> {
+    return firestoreService.getById<Category>(COLLECTIONS.CATEGORIES, id);
   },
 
-  create(data: Omit<Category, 'id'>): Category {
-    const categories = this.getAll();
-    const newCategory: Category = {
-      id: getNextId(STORAGE_KEYS.CATEGORY_COUNTER),
-      ...data,
-    };
-    categories.push(newCategory);
-    saveToStorage(STORAGE_KEYS.CATEGORIES, categories);
-    return newCategory;
+  async create(data: Omit<Category, 'id'>): Promise<Category> {
+    return firestoreService.create<Category>(
+      COLLECTIONS.CATEGORIES,
+      data,
+      COUNTER_NAME
+    );
   },
 
-  update(id: number, data: Partial<Omit<Category, 'id'>>): Category | null {
-    const categories = this.getAll();
-    const index = categories.findIndex(c => c.id === id);
-    
-    if (index === -1) return null;
-    
-    categories[index] = { ...categories[index], ...data };
-    saveToStorage(STORAGE_KEYS.CATEGORIES, categories);
-    return categories[index];
+  async update(id: number, data: Partial<Omit<Category, 'id'>>): Promise<Category | null> {
+    return firestoreService.update<Category>(COLLECTIONS.CATEGORIES, id, data);
   },
 
-  delete(id: number): boolean {
-    const categories = this.getAll();
-    const filtered = categories.filter(c => c.id !== id);
-    
-    if (filtered.length === categories.length) return false;
-    
-    saveToStorage(STORAGE_KEYS.CATEGORIES, filtered);
-    return true;
+  async delete(id: number): Promise<boolean> {
+    return firestoreService.delete(COLLECTIONS.CATEGORIES, id);
   },
 };
-

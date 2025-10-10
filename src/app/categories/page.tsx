@@ -37,8 +37,9 @@ export default function CategoriesPage() {
     loadCategories();
   }, []);
 
-  const loadCategories = () => {
-    setCategories(categoryService.getAll());
+  const loadCategories = async () => {
+    const data = await categoryService.getAll();
+    setCategories(data);
   };
 
   const handleOpenDialog = (category?: Category) => {
@@ -52,29 +53,29 @@ export default function CategoriesPage() {
     setIsDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formName.trim()) {
       alert('Category name is required');
       return;
     }
 
     if (editingCategory) {
-      categoryService.update(editingCategory.id, { name: formName });
+      await categoryService.update(editingCategory.id, { name: formName });
     } else {
-      categoryService.create({ name: formName });
+      await categoryService.create({ name: formName });
     }
 
     setIsDialogOpen(false);
     setFormName('');
     setEditingCategory(null);
-    loadCategories();
+    await loadCategories();
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: number) => {
     if (deleteConfirm === id) {
-      categoryService.delete(id);
+      await categoryService.delete(id);
       setDeleteConfirm(null);
-      loadCategories();
+      await loadCategories();
     } else {
       setDeleteConfirm(id);
       setTimeout(() => setDeleteConfirm(null), 3000);

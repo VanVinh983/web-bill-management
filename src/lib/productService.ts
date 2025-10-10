@@ -1,58 +1,43 @@
 import { Product } from '@/types/models';
-import { getFromStorage, saveToStorage, getNextId, STORAGE_KEYS } from './localStorage';
+import { firestoreService, COLLECTIONS } from './firestoreService';
+
+const COUNTER_NAME = 'product_counter';
 
 export const productService = {
-  getAll(): Product[] {
-    return getFromStorage<Product>(STORAGE_KEYS.PRODUCTS);
+  async getAll(): Promise<Product[]> {
+    return firestoreService.getAll<Product>(COLLECTIONS.PRODUCTS);
   },
 
-  getById(id: number): Product | undefined {
-    const products = this.getAll();
-    return products.find(p => p.id === id);
+  async getById(id: number): Promise<Product | null> {
+    return firestoreService.getById<Product>(COLLECTIONS.PRODUCTS, id);
   },
 
-  create(data: Omit<Product, 'id' | 'createdAt'>): Product {
-    const products = this.getAll();
-    const newProduct: Product = {
-      id: getNextId(STORAGE_KEYS.PRODUCT_COUNTER),
+  async create(data: Omit<Product, 'id' | 'createdAt'>): Promise<Product> {
+    const newProduct = {
       ...data,
       createdAt: new Date().toISOString(),
     };
-    products.push(newProduct);
-    saveToStorage(STORAGE_KEYS.PRODUCTS, products);
-    return newProduct;
+    return firestoreService.create<Product>(
+      COLLECTIONS.PRODUCTS,
+      newProduct,
+      COUNTER_NAME
+    );
   },
 
-  update(id: number, data: Partial<Omit<Product, 'id' | 'createdAt'>>): Product | null {
-    const products = this.getAll();
-    const index = products.findIndex(p => p.id === id);
-    
-    if (index === -1) return null;
-    
-    products[index] = { ...products[index], ...data };
-    saveToStorage(STORAGE_KEYS.PRODUCTS, products);
-    return products[index];
+  async update(id: number, data: Partial<Omit<Product, 'id' | 'createdAt'>>): Promise<Product | null> {
+    return firestoreService.update<Product>(COLLECTIONS.PRODUCTS, id, data);
   },
 
-  delete(id: number): boolean {
-    const products = this.getAll();
-    const filtered = products.filter(p => p.id !== id);
-    
-    if (filtered.length === products.length) return false;
-    
-    saveToStorage(STORAGE_KEYS.PRODUCTS, filtered);
-    return true;
+  async delete(id: number): Promise<boolean> {
+    return firestoreService.delete(COLLECTIONS.PRODUCTS, id);
   },
 
-  updateStock(id: number, quantityChange: number): Product | null {
-    const products = this.getAll();
-    const index = products.findIndex(p => p.id === id);
+  async updateStock(id: number, quantityChange: number): Promise<Product | null> {
+    const product = await this.getById(id);
     
-    if (index === -1) return null;
+    if (!product) return null;
     
-    products[index].stockQuantity += quantityChange;
-    saveToStorage(STORAGE_KEYS.PRODUCTS, products);
-    return products[index];
+    const newStockQuantity = product.stockQuantity + quantityChange;
+    return this.update(id, { stockQuantity: newStockQuantity });
   },
 };
-

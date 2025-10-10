@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { categoryService } from '@/lib/categoryService';
 import { productService } from '@/lib/productService';
@@ -18,6 +19,7 @@ interface Stats {
 }
 
 export default function Dashboard() {
+  const router = useRouter();
   const [stats, setStats] = useState<Stats>({
     totalCategories: 0,
     totalProducts: 0,
@@ -36,38 +38,42 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    const categories = categoryService.getAll();
-    const products = productService.getAll();
-    const invoices = invoiceService.getAll();
-    const revenue = invoiceService.getTotalRevenue();
+    const loadData = async () => {
+      const categories = await categoryService.getAll();
+      const products = await productService.getAll();
+      const invoices = await invoiceService.getAll();
+      const revenue = await invoiceService.getTotalRevenue();
 
-    setStats({
-      totalCategories: categories.length,
-      totalProducts: products.length,
-      totalInvoices: invoices.length,
-      totalRevenue: revenue,
-    });
+      setStats({
+        totalCategories: categories.length,
+        totalProducts: products.length,
+        totalInvoices: invoices.length,
+        totalRevenue: revenue,
+      });
 
-    // Get storage info
-    setStorageInfo(getStorageInfo());
+      // Get storage info
+      setStorageInfo(getStorageInfo());
 
-    // Calculate monthly revenue
-    const monthlyRevenue: Record<string, number> = {};
-    invoices.forEach(invoice => {
-      const date = new Date(invoice.orderDate);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + invoice.totalAmount;
-    });
+      // Calculate monthly revenue
+      const monthlyRevenue: Record<string, number> = {};
+      invoices.forEach(invoice => {
+        const date = new Date(invoice.orderDate);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + invoice.totalAmount;
+      });
 
-    const chartData = Object.entries(monthlyRevenue)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-6)
-      .map(([month, revenue]) => ({
-        month,
-        revenue,
-      }));
+      const chartData = Object.entries(monthlyRevenue)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .slice(-6)
+        .map(([month, revenue]) => ({
+          month,
+          revenue,
+        }));
 
-    setMonthlyData(chartData);
+      setMonthlyData(chartData);
+    };
+    
+    loadData();
   }, []);
 
   const cards = [
@@ -77,6 +83,7 @@ export default function Dashboard() {
       icon: FolderTree,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
+      link: '/categories',
     },
     {
       title: 'Sản phẩm',
@@ -84,6 +91,7 @@ export default function Dashboard() {
       icon: Package,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
+      link: '/products',
     },
     {
       title: 'Hóa đơn',
@@ -91,6 +99,7 @@ export default function Dashboard() {
       icon: FileText,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
+      link: '/invoices',
     },
     {
       title: 'Doanh thu',
@@ -98,6 +107,7 @@ export default function Dashboard() {
       icon: DollarSign,
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
+      link: null,
     },
   ];
 
@@ -107,7 +117,11 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
         {cards.map((card, index) => (
-          <Card key={index} className="shadow-sm hover:shadow-md transition-shadow">
+          <Card 
+            key={index} 
+            className={`shadow-sm hover:shadow-md transition-all ${card.link ? 'cursor-pointer hover:scale-105' : ''}`}
+            onClick={() => card.link && router.push(card.link)}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 lg:p-6">
               <CardTitle className="text-xs lg:text-sm font-medium text-gray-600">{card.title}</CardTitle>
               <div className={`p-1.5 lg:p-2 rounded-full ${card.bgColor}`}>

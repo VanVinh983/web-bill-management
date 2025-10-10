@@ -1,13 +1,20 @@
 # Invoice Management Web App
 
-A complete client-side Invoice Management application built with Next.js 15, TypeScript, TailwindCSS, and shadcn/ui. All data is stored and persisted in localStorage.
+A complete Invoice Management application built with Next.js 15, TypeScript, TailwindCSS, and shadcn/ui. Data is stored and persisted in **Firebase Firestore** (with migration support from localStorage).
 
 ## 🚀 Features
 
-### 1. Dashboard
+### 1. Authentication & Security 🔐
+- **Firebase Authentication**: Secure email/password authentication
+- **Protected Routes**: All routes require login
+- **Session Management**: Automatic token refresh
+- **User Management**: Register, login, logout functionality
+- **Security Rules**: Firestore rules enforce authentication
+
+### 2. Dashboard
 - **Summary Cards**: Display total categories, products, invoices, and revenue
 - **Monthly Revenue Chart**: Visual representation of revenue trends over the last 6 months
-- Real-time statistics updated from localStorage
+- Real-time statistics updated from Firestore
 
 ### 2. Categories Management
 - ✅ Create new categories
@@ -60,14 +67,40 @@ A complete client-side Invoice Management application built with Next.js 15, Typ
 - **Charts**: Recharts
 - **Date Utilities**: date-fns
 - **Icons**: Lucide React
-- **Storage**: localStorage (client-side only)
+- **Database**: Firebase Firestore
+- **Backend**: Firebase (serverless)
 
-## 📦 Installation
+## 📦 Installation & Setup
+
+### 1. Install Dependencies
 
 ```bash
 # Install dependencies
 yarn install
+```
 
+### 2. Firebase Configuration
+
+**Quan trọng**: Bạn cần cấu hình Firebase trước khi chạy ứng dụng.
+
+1. Xem hướng dẫn chi tiết trong [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
+2. Tạo Firebase project
+3. Tạo Firestore database
+4. **Enable Authentication** (Email/Password)
+5. Tạo file `.env.local` với cấu hình Firebase:
+
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+```
+
+### 3. Run Application
+
+```bash
 # Run development server
 yarn dev
 
@@ -78,7 +111,19 @@ yarn build
 yarn start
 ```
 
-The application will be available at `http://localhost:3000`
+The application will be available at `http://localhost:3002` (or port specified in package.json)
+
+### 4. Create First User
+
+1. Truy cập `http://localhost:3002`
+2. Bạn sẽ được redirect đến trang login
+3. Click "Chưa có tài khoản? Đăng ký ngay"
+4. Điền thông tin và đăng ký
+5. Đăng nhập và bắt đầu sử dụng!
+
+### 5. Migration từ LocalStorage (Nếu cần)
+
+Nếu bạn đã có dữ liệu cũ trong localStorage, xem hướng dẫn migration trong [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md)
 
 ## 📊 Data Models
 
@@ -132,19 +177,23 @@ The application will be available at `http://localhost:3000`
 }
 ```
 
-## 🗄️ LocalStorage Keys
+## 🗄️ Database Structure (Firestore)
 
-- `invoiceApp_categories` - Categories data
-- `invoiceApp_products` - Products data
-- `invoiceApp_invoices` - Invoices data
-- `invoiceApp_categories_counter` - Category ID counter
-- `invoiceApp_products_counter` - Product ID counter
-- `invoiceApp_invoices_counter` - Invoice ID counter
+### Collections
+
+- **categories** - Category documents
+- **products** - Product documents
+- **invoices** - Invoice documents
+- **counters** - ID counter documents for auto-increment
+
+### ID Management
+
+Each collection maintains an auto-increment ID using Firestore transactions to ensure uniqueness and sequential ordering.
 
 ## 🎨 Features Highlights
 
 ### Auto-increment ID System
-Each entity (categories, products, invoices) maintains its own counter in localStorage, ensuring unique sequential IDs.
+Each entity (categories, products, invoices) maintains its own counter in Firestore, ensuring unique sequential IDs across all clients.
 
 ### Stock Management
 - Stock quantities are automatically deducted when creating invoices
@@ -182,10 +231,13 @@ src/
 │   ├── Sidebar.tsx       # Navigation sidebar
 │   └── InvoiceForm.tsx   # Invoice creation/editing form
 ├── lib/
-│   ├── localStorage.ts   # LocalStorage utilities
+│   ├── firebase.ts       # Firebase configuration
+│   ├── firestoreService.ts # Firestore CRUD utilities
 │   ├── categoryService.ts
 │   ├── productService.ts
 │   ├── invoiceService.ts
+│   ├── migrationUtils.ts # Migration from localStorage
+│   ├── localStorage.ts   # Legacy localStorage utilities
 │   ├── formatters.ts     # Date and currency formatters
 │   └── utils.ts          # Utility functions
 └── types/
@@ -204,7 +256,9 @@ The app starts with an empty state. You can:
 
 ### Clearing Data
 
-To reset all data, open browser DevTools Console and run:
+**Firestore**: Vào Firebase Console > Firestore Database và xóa các documents
+
+**LocalStorage** (legacy): Open browser DevTools Console and run:
 ```javascript
 localStorage.clear();
 location.reload();
@@ -213,13 +267,23 @@ location.reload();
 ## 🌟 Best Practices Implemented
 
 - ✅ TypeScript for type safety
-- ✅ Client-side component architecture
+- ✅ Client-side component architecture with async/await
 - ✅ Reusable service layer for data operations
+- ✅ Firebase Firestore for scalable cloud database
 - ✅ Proper form validation
 - ✅ Responsive design
 - ✅ Clean code organization
 - ✅ User-friendly error handling
 - ✅ Confirmation dialogs for destructive actions
+- ✅ Transaction support for data consistency
+
+## 📚 Additional Documentation
+
+- [Firebase Setup Guide](./FIREBASE_SETUP.md) - Chi tiết cấu hình Firebase
+- [Authentication Guide](./AUTHENTICATION_GUIDE.md) - Hướng dẫn về authentication
+- [Firestore Security Rules](./FIRESTORE_SECURITY_RULES.md) - Security rules chi tiết
+- [Migration Guide](./MIGRATION_GUIDE.md) - Hướng dẫn migration từ localStorage
+- [Features Documentation](./FEATURES.md) - Chi tiết các tính năng
 
 ## 📝 License
 
