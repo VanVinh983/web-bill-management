@@ -83,7 +83,7 @@ function ProductsContent() {
         name: product.name,
         categoryId: product.categoryId.toString(),
         note: product.note,
-        expirationDate: product.expirationDate.split('T')[0],
+        expirationDate: product.expirationDate ? product.expirationDate.split('T')[0] : '',
         costPrice: product.costPrice.toString(),
         salePrice: product.salePrice.toString(),
         stockQuantity: product.stockQuantity.toString(),
@@ -133,13 +133,14 @@ function ProductsContent() {
       return;
     }
 
-    const expirationDate = new Date(formData.expirationDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (expirationDate < today) {
-      alert('Expiration date must be today or later');
-      return;
+    if (formData.expirationDate) {
+      const expirationDate = new Date(formData.expirationDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (expirationDate < today) {
+        alert('Expiration date must be today or later');
+        return;
+      }
     }
 
     const stockQuantity = parseInt(formData.stockQuantity);
@@ -148,15 +149,18 @@ function ProductsContent() {
       return;
     }
 
-    const productData = {
+    const productData: Omit<Product, 'id' | 'createdAt'> = {
       name: formData.name,
       categoryId: parseInt(formData.categoryId),
       note: formData.note,
-      expirationDate: new Date(formData.expirationDate).toISOString(),
       costPrice,
       salePrice,
       stockQuantity,
     };
+
+    if (formData.expirationDate) {
+      productData.expirationDate = new Date(formData.expirationDate).toISOString();
+    }
 
     if (editingProduct) {
       await productService.update(editingProduct.id, productData);
@@ -262,7 +266,7 @@ function ProductsContent() {
                       </div>
                       <div className="col-span-2">
                         <p className="text-xs text-gray-500">HSD</p>
-                        <p className="text-sm font-medium">{formatDate(product.expirationDate)}</p>
+                        <p className="text-sm font-medium">{product.expirationDate ? formatDate(product.expirationDate) : '-'}</p>
                       </div>
                       {product.note && (
                         <div className="col-span-2">
@@ -326,7 +330,7 @@ function ProductsContent() {
                         <TableCell>{getCategoryName(product.categoryId)}</TableCell>
                         <TableCell className="text-right">{formatCurrency(product.salePrice)}</TableCell>
                         <TableCell className="text-right">{product.stockQuantity}</TableCell>
-                        <TableCell>{formatDate(product.expirationDate)}</TableCell>
+                        <TableCell>{product.expirationDate ? formatDate(product.expirationDate) : '-'}</TableCell>
                         <TableCell className="max-w-xs truncate">{product.note || '-'}</TableCell>
                         <TableCell className="text-right space-x-2">
                           <Button
@@ -436,7 +440,7 @@ function ProductsContent() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="expirationDate" className="text-sm font-medium">Hạn sử dụng *</Label>
+              <Label htmlFor="expirationDate" className="text-sm font-medium">Hạn sử dụng</Label>
               <Input
                 id="expirationDate"
                 type="date"

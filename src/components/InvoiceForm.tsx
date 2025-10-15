@@ -190,7 +190,7 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
         categoryId: parseInt(quickProductForm.categoryId),
         salePrice,
         costPrice,
-        stockQuantity: 0, // Default stock quantity
+        stockQuantity: 1, // Default stock quantity
         note: '',
         expirationDate: '',
       });

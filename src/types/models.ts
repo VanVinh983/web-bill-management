@@ -10,7 +10,7 @@ export interface Product {
   name: string;
   categoryId: number;
   note: string;
-  expirationDate: string; // ISO date
+  expirationDate?: string; // ISO date, optional when not provided
   costPrice: number;
   salePrice: number;
   stockQuantity: number;
