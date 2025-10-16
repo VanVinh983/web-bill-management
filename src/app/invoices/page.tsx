@@ -28,6 +28,8 @@ export default function InvoicesPage() {
     endDate: '',
   });
 
+  const formatOrderCode = (id: number) => `${id.toString().padStart(3, '0')}`;
+
   useEffect(() => {
     loadInvoices();
   }, []);
@@ -170,7 +172,7 @@ export default function InvoicesPage() {
         <>
           {/* Mobile View - Cards */}
           <div className="block lg:hidden space-y-3">
-            {filteredInvoices.map((invoice) => (
+            {filteredInvoices.map((invoice, index) => (
               <Card 
                 key={invoice.id} 
                 className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
@@ -180,7 +182,7 @@ export default function InvoicesPage() {
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">Hóa đơn #{invoice.id}</p>
+                        <p className="text-lg font-bold text-red-600 mb-1">Mã đơn: {formatOrderCode(invoice.id)}</p>
                         <div className="flex items-center gap-1.5 mb-1">
                           <User className="h-3.5 w-3.5 text-gray-500" />
                           <p className="font-semibold text-base">{invoice.customerName}</p>
@@ -191,7 +193,7 @@ export default function InvoicesPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-green-600">{formatCurrency(invoice.totalAmount)}</p>
+                        <p className="text-lg font-bold text-red-600">{formatCurrency(invoice.totalAmount)}</p>
                       </div>
                     </div>
                     
@@ -242,7 +244,7 @@ export default function InvoicesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-20">ID</TableHead>
+                    <TableHead className="w-36">Mã đơn hàng</TableHead>
                     <TableHead>Khách hàng</TableHead>
                     <TableHead>Số điện thoại</TableHead>
                     <TableHead>Ngày</TableHead>
@@ -253,7 +255,7 @@ export default function InvoicesPage() {
                 <TableBody>
                   {filteredInvoices.map((invoice) => (
                     <TableRow key={invoice.id}>
-                      <TableCell className="font-medium">{invoice.id}</TableCell>
+                      <TableCell className="font-mono text-sm">{formatOrderCode(invoice.id)}</TableCell>
                       <TableCell>{invoice.customerName}</TableCell>
                       <TableCell>{invoice.customerPhone}</TableCell>
                       <TableCell>{formatDateTime(invoice.orderDate)}</TableCell>

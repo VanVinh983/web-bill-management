@@ -39,7 +39,9 @@ export default function CategoriesPage() {
 
   const loadCategories = async () => {
     const data = await categoryService.getAll();
-    setCategories(data);
+    // Sort by id descending (newest first)
+    const sorted = [...data].sort((a, b) => b.id - a.id);
+    setCategories(sorted);
   };
 
   const handleOpenDialog = (category?: Category) => {
@@ -102,7 +104,7 @@ export default function CategoriesPage() {
         <>
           {/* Mobile View - Cards */}
           <div className="block lg:hidden space-y-3">
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <Card 
                 key={category.id} 
                 className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
@@ -111,7 +113,7 @@ export default function CategoriesPage() {
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <p className="text-xs text-gray-500 mb-1">ID: {category.id}</p>
+                      <p className="text-xs text-gray-500 mb-1">STT: {index + 1}</p>
                       <p className="text-base font-semibold">{category.name}</p>
                     </div>
                     <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
@@ -147,19 +149,19 @@ export default function CategoriesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-20">ID</TableHead>
+                    <TableHead className="w-20">STT</TableHead>
                     <TableHead>Tên danh mục</TableHead>
                     <TableHead className="w-32 text-right">Thao tác</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {categories.map((category) => (
+                  {categories.map((category, index) => (
                     <TableRow 
                       key={category.id}
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => router.push(`/products?categoryId=${category.id}`)}
                     >
-                      <TableCell>{category.id}</TableCell>
+                      <TableCell>{index + 1}</TableCell>
                       <TableCell>{category.name}</TableCell>
                       <TableCell className="text-right space-x-2" onClick={(e) => e.stopPropagation()}>
                         <Button

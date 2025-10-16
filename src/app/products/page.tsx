@@ -73,7 +73,9 @@ function ProductsContent() {
 
   const loadProducts = async () => {
     const data = await productService.getAll();
-    setProducts(data);
+    // Sort by id descending (newest first)
+    const sorted = [...data].sort((a, b) => b.id - a.id);
+    setProducts(sorted);
   };
 
   const handleOpenDialog = (product?: Product) => {
@@ -243,13 +245,13 @@ function ProductsContent() {
         <>
           {/* Mobile View - Cards */}
           <div className="block lg:hidden space-y-3">
-            {filteredProducts.map((product) => (
+            {filteredProducts.map((product, index) => (
               <Card key={product.id} className="shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="text-xs text-gray-500 mb-1">ID: {product.id}</p>
+                        <p className="text-xs text-gray-500 mb-1">STT: {index + 1}</p>
                         <h3 className="font-semibold text-base mb-1">{product.name}</h3>
                         <p className="text-sm text-gray-600">{getCategoryName(product.categoryId)}</p>
                       </div>
@@ -257,8 +259,8 @@ function ProductsContent() {
                     
                     <div className="grid grid-cols-2 gap-3 pt-2 border-t">
                       <div>
-                        <p className="text-xs text-gray-500">Giá bán</p>
-                        <p className="text-sm font-semibold text-green-600">{formatCurrency(product.salePrice)}</p>
+                        <p className="text-xs text-gray-500">Giá vốn</p>
+                        <p className="text-sm font-semibold text-red-600">{formatCurrency(product.costPrice)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500">Tồn kho</p>
@@ -312,10 +314,10 @@ function ProductsContent() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-16">ID</TableHead>
+                      <TableHead className="w-16">STT</TableHead>
                       <TableHead>Tên sản phẩm</TableHead>
                       <TableHead>Danh mục</TableHead>
-                      <TableHead className="text-right">Giá bán</TableHead>
+                      <TableHead className="text-right">Giá vốn</TableHead>
                       <TableHead className="text-right">Tồn kho</TableHead>
                       <TableHead>HSD</TableHead>
                       <TableHead>Ghi chú</TableHead>
@@ -323,12 +325,12 @@ function ProductsContent() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProducts.map((product) => (
+                  {filteredProducts.map((product, index) => (
                       <TableRow key={product.id}>
-                        <TableCell>{product.id}</TableCell>
+                        <TableCell>{index + 1}</TableCell>
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell>{getCategoryName(product.categoryId)}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(product.salePrice)}</TableCell>
+                        <TableCell className="text-right text-red-600">{formatCurrency(product.costPrice)}</TableCell>
                         <TableCell className="text-right">{product.stockQuantity}</TableCell>
                         <TableCell>{product.expirationDate ? formatDate(product.expirationDate) : '-'}</TableCell>
                         <TableCell className="max-w-xs truncate">{product.note || '-'}</TableCell>

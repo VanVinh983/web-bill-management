@@ -7,8 +7,11 @@ import {
   updateDoc, 
   deleteDoc,
   query,
+  orderBy,
   runTransaction,
-  writeBatch
+  writeBatch,
+  type DocumentData,
+  type UpdateData
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -44,7 +47,7 @@ export const firestoreService = {
   // Get all documents from a collection
   async getAll<T>(collectionName: string): Promise<T[]> {
     try {
-      const q = query(collection(db, collectionName));
+      const q = query(collection(db, collectionName), orderBy('id', 'asc'));
       const querySnapshot = await getDocs(q);
       
       return querySnapshot.docs.map(doc => ({
@@ -147,7 +150,7 @@ export const firestoreService = {
   async batchUpdate(operations: Array<{
     collectionName: string;
     id: number;
-    data: Record<string, unknown>;
+    data: UpdateData<DocumentData>;
   }>): Promise<boolean> {
     try {
       const batch = writeBatch(db);

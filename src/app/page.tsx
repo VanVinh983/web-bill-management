@@ -7,9 +7,11 @@ import { categoryService } from '@/lib/categoryService';
 import { productService } from '@/lib/productService';
 import { invoiceService } from '@/lib/invoiceService';
 import { formatCurrency } from '@/lib/formatters';
-import { getStorageInfo, formatBytes } from '@/lib/storageUtils';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { FolderTree, Package, FileText, DollarSign, HardDrive } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { FolderTree, Package, FileText, DollarSign } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Invoice } from '@/types/models';
+import { Button } from '@/components/ui/button';
 
 interface Stats {
   totalCategories: number;
@@ -20,6 +22,7 @@ interface Stats {
 
 export default function Dashboard() {
   const router = useRouter();
+  const [invoicesState, setInvoicesState] = useState<Invoice[]>([]);
   const [stats, setStats] = useState<Stats>({
     totalCategories: 0,
     totalProducts: 0,
@@ -27,15 +30,39 @@ export default function Dashboard() {
     totalRevenue: 0,
   });
 
-  const [monthlyData, setMonthlyData] = useState<{ month: string; revenue: number }[]>([]);
-  const [storageInfo, setStorageInfo] = useState({
-    usedBytes: 0,
-    usedKB: 0,
-    usedMB: 0,
-    quotaBytes: 0,
-    quotaMB: 0,
-    percentageUsed: 0,
-  });
+
+  const [dailyData, setDailyData] = useState<{ date: string; revenue: number }[]>([]);
+  const [startDateStr, setStartDateStr] = useState<string>('');
+  const [endDateStr, setEndDateStr] = useState<string>('');
+
+  const toIsoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const setToday = () => {
+    const today = new Date();
+    const s = toIsoDate(today);
+    setStartDateStr(s);
+    setEndDateStr(s);
+  };
+  const setLast7Days = () => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 6);
+    setStartDateStr(toIsoDate(start));
+    setEndDateStr(toIsoDate(end));
+  };
+  const setLast30Days = () => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 29);
+    setStartDateStr(toIsoDate(start));
+    setEndDateStr(toIsoDate(end));
+  };
+  const setThisMonth = () => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    setStartDateStr(toIsoDate(start));
+    setEndDateStr(toIsoDate(end));
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -50,31 +77,52 @@ export default function Dashboard() {
         totalInvoices: invoices.length,
         totalRevenue: revenue,
       });
+      setInvoicesState(invoices);
 
-      // Get storage info
-      setStorageInfo(getStorageInfo());
-
-      // Calculate monthly revenue
-      const monthlyRevenue: Record<string, number> = {};
-      invoices.forEach(invoice => {
-        const date = new Date(invoice.orderDate);
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + invoice.totalAmount;
-      });
-
-      const chartData = Object.entries(monthlyRevenue)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .slice(-6)
-        .map(([month, revenue]) => ({
-          month,
-          revenue,
-        }));
-
-      setMonthlyData(chartData);
+      // Initialize default range: last 30 days
+      const today = new Date();
+      const start = new Date();
+      start.setDate(today.getDate() - 29);
+      const toIsoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      setStartDateStr(toIsoDate(start));
+      setEndDateStr(toIsoDate(today));
     };
     
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (!invoicesState.length || !startDateStr || !endDateStr) {
+      setDailyData([]);
+      return;
+    }
+
+    const start = new Date(startDateStr + 'T00:00:00');
+    const end = new Date(endDateStr + 'T23:59:59');
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) {
+      setDailyData([]);
+      return;
+    }
+
+    const dailyRevenue: Record<string, number> = {};
+    invoicesState.forEach((invoice) => {
+      const d = new Date(invoice.orderDate);
+      if (d >= start && d <= end) {
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        dailyRevenue[key] = (dailyRevenue[key] || 0) + invoice.totalAmount;
+      }
+    });
+
+    const chartData: { date: string; revenue: number }[] = [];
+    const cur = new Date(start);
+    while (cur <= end) {
+      const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
+      chartData.push({ date: key, revenue: dailyRevenue[key] || 0 });
+      cur.setDate(cur.getDate() + 1);
+    }
+
+    setDailyData(chartData);
+  }, [invoicesState, startDateStr, endDateStr]);
 
   const cards = [
     {
@@ -135,91 +183,41 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Storage Usage Card */}
-      <Card className="shadow-sm mb-6 lg:mb-8">
-        <CardHeader className="p-4 lg:p-6">
-          <div className="flex items-center gap-2">
-            <HardDrive className="h-5 w-5 text-gray-600" />
-            <CardTitle className="text-base lg:text-lg">Dung lượng lưu trữ</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="p-4 lg:p-6 pt-0">
-          <div className="space-y-3">
-            {/* Progress Bar */}
-            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-300 ${
-                  storageInfo.percentageUsed > 80
-                    ? 'bg-red-500'
-                    : storageInfo.percentageUsed > 50
-                    ? 'bg-yellow-500'
-                    : 'bg-green-500'
-                }`}
-                style={{ width: `${Math.min(storageInfo.percentageUsed, 100)}%` }}
-              />
-            </div>
-            
-            {/* Storage Info */}
-            <div className="flex justify-between items-center text-sm">
-              <div className="space-y-1">
-                <p className="text-gray-600">
-                  Đã sử dụng: <span className="font-semibold text-gray-900">{formatBytes(storageInfo.usedBytes)}</span>
-                </p>
-                <p className="text-gray-600">
-                  Tổng dung lượng: <span className="font-semibold text-gray-900">{storageInfo.quotaMB} MB</span>
-                </p>
-              </div>
-              <div className="text-right">
-                <p className={`text-2xl font-bold ${
-                  storageInfo.percentageUsed > 80
-                    ? 'text-red-600'
-                    : storageInfo.percentageUsed > 50
-                    ? 'text-yellow-600'
-                    : 'text-green-600'
-                }`}>
-                  {storageInfo.percentageUsed.toFixed(1)}%
-                </p>
-                <p className="text-xs text-gray-500">đã dùng</p>
-              </div>
-            </div>
+      
+      <div className="mb-4 lg:mb-6 grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4 items-end">
+        <div className="flex flex-col">
+          <label className="text-xs lg:text-sm text-gray-600 mb-1">Từ ngày</label>
+          <Input type="date" value={startDateStr} onChange={(e) => setStartDateStr(e.target.value)} />
+        </div>
+        <div className="flex flex-col">
+          <label className="text-xs lg:text-sm text-gray-600 mb-1">Đến ngày</label>
+          <Input type="date" value={endDateStr} onChange={(e) => setEndDateStr(e.target.value)} />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" size="sm" onClick={setToday}>Hôm nay</Button>
+          <Button variant="secondary" size="sm" onClick={setLast7Days}>7 ngày</Button>
+          <Button variant="secondary" size="sm" onClick={setLast30Days}>30 ngày</Button>
+          <Button variant="secondary" size="sm" onClick={setThisMonth}>Tháng này</Button>
+        </div>
+      </div>
 
-            {/* Warning if storage is high */}
-            {storageInfo.percentageUsed > 80 && (
-              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-800">
-                  ⚠️ Dung lượng lưu trữ sắp đầy. Hãy xem xét xóa bớt dữ liệu cũ.
-                </p>
-              </div>
-            )}
-            
-            {storageInfo.percentageUsed > 50 && storageInfo.percentageUsed <= 80 && (
-              <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800">
-                  💡 Dung lượng đã sử dụng hơn 50%. Hãy theo dõi thường xuyên.
-                </p>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {monthlyData.length > 0 && (
+      {dailyData.length > 0 && (
         <Card className="shadow-sm">
           <CardHeader className="p-4 lg:p-6">
-            <CardTitle className="text-base lg:text-lg">Doanh thu theo tháng (6 tháng gần nhất)</CardTitle>
+            <CardTitle className="text-base lg:text-lg">Doanh thu theo ngày</CardTitle>
           </CardHeader>
           <CardContent className="p-4 lg:p-6 pt-0">
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={monthlyData}>
+              <LineChart data={dailyData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip
                   formatter={(value: number) => formatCurrency(value)}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="revenue" fill="#8884d8" name="Doanh thu" />
-              </BarChart>
+                <Line type="monotone" dataKey="revenue" stroke="#8884d8" name="Doanh thu" dot={false} strokeWidth={2} />
+              </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>

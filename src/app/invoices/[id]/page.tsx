@@ -23,6 +23,8 @@ export default function InvoiceDetailPage() {
   const params = useParams();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
 
+  const formatOrderCode = (id: number) => id.toString().padStart(3, '0');
+
   useEffect(() => {
     const loadInvoice = async () => {
       const id = parseInt(params.id as string);
@@ -54,7 +56,7 @@ export default function InvoiceDetailPage() {
             <ArrowLeft className="h-4 w-4 mr-1 lg:mr-2" />
             <span className="hidden sm:inline">Quay lại</span>
           </Button>
-          <h1 className="text-xl lg:text-3xl font-bold text-gray-900">Hóa đơn #{invoice.id}</h1>
+          <h1 className="text-xl lg:text-2xl font-extrabold text-red-600">Mã đơn: {formatOrderCode(invoice.id)}</h1>
         </div>
         <Button onClick={() => router.push(`/invoices/${invoice.id}/edit`)} className="h-9 lg:h-10 w-full sm:w-auto">
           <Pencil className="h-4 w-4 mr-2" />
@@ -70,7 +72,7 @@ export default function InvoiceDetailPage() {
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 lg:p-6 pt-0">
             <div>
               <p className="text-xs lg:text-sm text-gray-500 mb-1">Mã đơn hàng</p>
-              <p className="text-base lg:text-lg font-semibold">#{invoice.id}</p>
+              <p className="text-2xl lg:text-4xl font-extrabold text-red-600">{formatOrderCode(invoice.id)}</p>
             </div>
             <div>
               <p className="text-xs lg:text-sm text-gray-500 mb-1">Ngày đặt</p>
@@ -135,7 +137,7 @@ export default function InvoiceDetailPage() {
                 </div>
                 <div className="flex justify-between text-lg font-bold pt-2 border-t">
                   <span>Tổng cộng:</span>
-                  <span className="text-green-600">{formatCurrency(invoice.totalAmount)}</span>
+                  <span className="text-red-600">{formatCurrency(invoice.totalAmount)}</span>
                 </div>
               </div>
             </div>
@@ -190,7 +192,7 @@ export default function InvoiceDetailPage() {
                     <TableCell colSpan={3} className="text-right font-bold text-lg">
                       Tổng cộng
                     </TableCell>
-                    <TableCell className="text-right font-bold text-lg text-green-600">
+                    <TableCell className="text-right font-bold text-lg text-red-600">
                       {formatCurrency(invoice.totalAmount)}
                     </TableCell>
                   </TableRow>

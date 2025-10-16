@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -75,6 +75,17 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
     salePrice: '',
     costPrice: '',
   });
+
+  // Search term for filtering products within the dropdown options
+  const [productSearch, setProductSearch] = useState('');
+  const [isProductSelectOpen, setIsProductSelectOpen] = useState(false);
+  const productSearchInputRef = useRef<HTMLInputElement | null>(null);
+
+  const filteredProducts = useMemo(() => {
+    const term = productSearch.trim().toLowerCase();
+    if (!term) return products;
+    return products.filter((p) => p.name.toLowerCase().includes(term));
+  }, [products, productSearch]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -338,18 +349,62 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
                 <Label htmlFor="product" className="text-sm font-medium">Sản phẩm</Label>
                 <div className="flex gap-2">
                   <Select
+                    open={isProductSelectOpen}
+                    onOpenChange={(open) => {
+                      setIsProductSelectOpen(open);
+                      if (open) {
+                        // Defer focus to the search input when panel opens
+                        setTimeout(() => {
+                          productSearchInputRef.current?.focus();
+                        }, 0);
+                      } else {
+                        // Optionally reset search when closing
+                        setProductSearch('');
+                      }
+                    }}
                     value={newItem.productId}
                     onValueChange={(value) => setNewItem({ ...newItem, productId: value })}
                   >
-                    <SelectTrigger className="h-11 text-base">
+                    <SelectTrigger className="h-11 text-base min-w-[160px] w-1/2">
                       <SelectValue placeholder="Chọn sản phẩm" />
                     </SelectTrigger>
                     <SelectContent>
-                      {products.map((product) => (
-                        <SelectItem key={product.id} value={product.id.toString()}>
-                          {product.name} - {formatCurrency(product.salePrice)} (Tồn: {product.stockQuantity})
-                        </SelectItem>
-                      ))}
+                      {/* Search input inside dropdown, above options */}
+                      <div className="p-2 sticky top-0 bg-popover">
+                        <Input
+                          id="productSearch"
+                          ref={productSearchInputRef}
+                          value={productSearch}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setProductSearch(val);
+                            // Keep focus after re-render
+                            requestAnimationFrame(() => {
+                              productSearchInputRef.current?.focus();
+                            });
+                          }}
+                          onKeyDown={(e) => {
+                            // Prevent Radix Select from hijacking keyboard events
+                            e.stopPropagation();
+                          }}
+                          onPointerDown={(e) => {
+                            // Prevent focus loss when clicking inside input
+                            e.stopPropagation();
+                          }}
+                          placeholder="Tìm theo tên sản phẩm"
+                          className="h-9 text-sm"
+                        />
+                      </div>
+
+                      {filteredProducts.length > 0 ? (
+                        filteredProducts.map((product) => (
+                          <SelectItem key={product.id} value={product.id.toString()}>
+                            {product.name} - {formatCurrency(product.salePrice)} (Tồn: {product.stockQuantity})
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem disabled value="__no_result__">Không có sản phẩm phù hợp</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                   <Button
