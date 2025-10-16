@@ -41,8 +41,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   };
 
   return (
-    <div className="flex h-full w-64 flex-col bg-slate-900 text-white">
-      <div className="flex h-16 items-center justify-center border-b border-slate-700">
+    <div className="flex h-full w-64 flex-col bg-orange-100 text-orange-900">
+      <div className="flex h-16 items-center justify-center border-b border-orange-200">
         <h1 className="text-xl font-bold">Quản lý hóa đơn</h1>
       </div>
       <nav className="flex-1 space-y-1 p-4">
@@ -56,8 +56,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
               className={cn(
                 'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-orange-200 text-orange-900'
+                  : 'text-orange-700 hover:bg-orange-200 hover:text-orange-900'
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -67,8 +67,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         })}
         
         {/* Admin Section */}
-        <div className="pt-4 mt-4 border-t border-slate-700">
-          <p className="px-3 mb-2 text-xs font-semibold text-slate-500 uppercase">Quản trị</p>
+        <div className="pt-4 mt-4 border-t border-orange-200">
+          <p className="px-3 mb-2 text-xs font-semibold text-orange-600 uppercase">Quản trị</p>
           {adminNavigation.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -79,8 +79,8 @@ export function Sidebar({ onNavigate }: SidebarProps) {
                 className={cn(
                   'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-slate-800 text-white'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-orange-200 text-orange-900'
+                    : 'text-orange-700 hover:bg-orange-200 hover:text-orange-900'
                 )}
               >
                 <item.icon className="h-5 w-5" />
@@ -92,15 +92,15 @@ export function Sidebar({ onNavigate }: SidebarProps) {
       </nav>
 
       {/* User section at bottom */}
-      <div className="border-t border-slate-700 p-4 space-y-3">
+      <div className="border-t border-orange-200 p-4 space-y-3">
         {user && (
-          <div className="flex items-center gap-3 px-3 py-2 bg-slate-800 rounded-md">
-            <User className="h-5 w-5 text-slate-400" />
+          <div className="flex items-center gap-3 px-3 py-2 bg-orange-200 rounded-md">
+            <User className="h-5 w-5 text-orange-600" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
                 {user.displayName || 'User'}
               </p>
-              <p className="text-xs text-slate-400 truncate">
+              <p className="text-xs text-orange-700 truncate">
                 {user.email}
               </p>
             </div>
@@ -110,7 +110,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
         <Button
           onClick={handleLogout}
           variant="ghost"
-          className="w-full justify-start text-slate-300 hover:bg-slate-800 hover:text-white"
+          className="w-full justify-start text-orange-700 hover:bg-orange-200 hover:text-orange-900"
         >
           <LogOut className="h-5 w-5 mr-3" />
           Đăng xuất

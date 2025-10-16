@@ -87,7 +87,7 @@ export default function CategoriesPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4 lg:mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Danh mục sản phẩm</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-[var(--color-orange-900)]">Danh mục sản phẩm</h1>
         <Button onClick={() => handleOpenDialog()} size="default" className="h-10 lg:h-10">
           <Plus className="mr-1 lg:mr-2 h-4 w-4" />
           <span className="hidden sm:inline">Thêm</span>

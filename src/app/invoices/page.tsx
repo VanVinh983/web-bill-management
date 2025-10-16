@@ -79,7 +79,7 @@ export default function InvoicesPage() {
       <div className="flex flex-col gap-4 mb-4 lg:mb-8">
         {/* Header */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Hóa đơn</h1>
+          <h1 className="text-2xl lg:text-3xl font-bold text-[var(--color-orange-900)]">Hóa đơn</h1>
           <Button onClick={() => router.push('/invoices/new')} className="h-10">
             <Plus className="mr-1 lg:mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Tạo</span>

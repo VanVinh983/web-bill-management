@@ -198,7 +198,7 @@ function ProductsContent() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 lg:mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Sản phẩm</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold text-[var(--color-orange-900)]">Sản phẩm</h1>
         <div className="flex gap-2 w-full sm:w-auto">
           <Select value={filterCategoryId} onValueChange={setFilterCategoryId}>
             <SelectTrigger className="h-10 w-full sm:w-[200px]">

@@ -77,7 +77,7 @@ export default function SetupPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Quay lại
         </Button>
-        <h1 className="text-3xl font-bold text-gray-900">Thiết lập hệ thống</h1>
+        <h1 className="text-3xl font-bold text-[var(--color-orange-900)]">Thiết lập hệ thống</h1>
       </div>
 
       {/* Warning Banner */}

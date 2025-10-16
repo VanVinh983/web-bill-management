@@ -10,7 +10,7 @@ import { formatCurrency } from '@/lib/formatters';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { FolderTree, Package, FileText, DollarSign } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Invoice } from '@/types/models';
+import { Invoice, Product } from '@/types/models';
 import { Button } from '@/components/ui/button';
 
 interface Stats {
@@ -18,6 +18,7 @@ interface Stats {
   totalProducts: number;
   totalInvoices: number;
   totalRevenue: number;
+  totalProfit?: number;
 }
 
 export default function Dashboard() {
@@ -31,9 +32,10 @@ export default function Dashboard() {
   });
 
 
-  const [dailyData, setDailyData] = useState<{ date: string; revenue: number }[]>([]);
+  const [dailyData, setDailyData] = useState<{ date: string; revenue: number; profit: number }[]>([]);
   const [startDateStr, setStartDateStr] = useState<string>('');
   const [endDateStr, setEndDateStr] = useState<string>('');
+  const [productsState, setProductsState] = useState<Product[]>([]);
 
   const toIsoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const setToday = () => {
@@ -71,21 +73,40 @@ export default function Dashboard() {
       const invoices = await invoiceService.getAll();
       const revenue = await invoiceService.getTotalRevenue();
 
+      // Build a quick lookup for products to compute profit
+      const productById = new Map(products.map((p) => [p.id, p]));
+
+      // Profit per invoice = sum over items: (unitPrice - costPrice) * quantity
+      // Ignore items whose product no longer exists; if all items ignored, profit for that invoice is 0
+      let totalProfit = 0;
+      for (const invoice of invoices) {
+        let invoiceProfit = 0;
+        for (const item of invoice.items) {
+          const product = productById.get(item.productId);
+          if (!product) continue;
+          const margin = item.unitPrice - product.costPrice;
+          invoiceProfit += margin * item.quantity;
+        }
+        totalProfit += invoiceProfit;
+      }
+
       setStats({
         totalCategories: categories.length,
         totalProducts: products.length,
         totalInvoices: invoices.length,
         totalRevenue: revenue,
+        totalProfit,
       });
       setInvoicesState(invoices);
+      setProductsState(products);
 
-      // Initialize default range: last 30 days
-      const today = new Date();
-      const start = new Date();
-      start.setDate(today.getDate() - 29);
+      // Initialize default range: current month
+      const now = new Date();
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       const toIsoDate = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       setStartDateStr(toIsoDate(start));
-      setEndDateStr(toIsoDate(today));
+      setEndDateStr(toIsoDate(end));
     };
     
     loadData();
@@ -105,24 +126,40 @@ export default function Dashboard() {
     }
 
     const dailyRevenue: Record<string, number> = {};
+    const dailyProfit: Record<string, number> = {};
+
+    // Build product lookup for costPrice (only if products loaded)
+    const hasProducts = productsState.length > 0;
+    const productById = hasProducts ? new Map(productsState.map((p) => [p.id, p])) : null;
+
     invoicesState.forEach((invoice) => {
       const d = new Date(invoice.orderDate);
       if (d >= start && d <= end) {
         const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         dailyRevenue[key] = (dailyRevenue[key] || 0) + invoice.totalAmount;
+        let invoiceProfit = 0;
+        if (hasProducts && productById) {
+          for (const item of invoice.items) {
+            const product = productById.get(item.productId);
+            if (!product) continue;
+            const margin = item.unitPrice - product.costPrice;
+            invoiceProfit += margin * item.quantity;
+          }
+        }
+        dailyProfit[key] = (dailyProfit[key] || 0) + invoiceProfit;
       }
     });
 
-    const chartData: { date: string; revenue: number }[] = [];
+    const chartData: { date: string; revenue: number; profit: number }[] = [];
     const cur = new Date(start);
     while (cur <= end) {
       const key = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`;
-      chartData.push({ date: key, revenue: dailyRevenue[key] || 0 });
+      chartData.push({ date: key, revenue: dailyRevenue[key] || 0, profit: dailyProfit[key] || 0 });
       cur.setDate(cur.getDate() + 1);
     }
 
     setDailyData(chartData);
-  }, [invoicesState, startDateStr, endDateStr]);
+  }, [invoicesState, productsState, startDateStr, endDateStr]);
 
   const cards = [
     {
@@ -157,11 +194,19 @@ export default function Dashboard() {
       bgColor: 'bg-orange-100',
       link: null,
     },
+    {
+      title: 'Lợi nhuận',
+      value: formatCurrency(stats.totalProfit || 0),
+      icon: DollarSign,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-100',
+      link: null,
+    },
   ];
 
   return (
     <div>
-      <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 lg:mb-8">Tổng quan</h1>
+      <h1 className="text-2xl lg:text-3xl font-bold text-[var(--color-orange-900)] mb-4 lg:mb-8">Tổng quan</h1>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
         {cards.map((card, index) => (
@@ -217,6 +262,7 @@ export default function Dashboard() {
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Line type="monotone" dataKey="revenue" stroke="#8884d8" name="Doanh thu" dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="profit" stroke="#10b981" name="Lợi nhuận" dot={false} strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>

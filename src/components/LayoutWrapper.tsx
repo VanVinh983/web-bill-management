@@ -34,11 +34,11 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <div className="flex flex-1 flex-col">
         {/* Mobile Header */}
-        <header className="lg:hidden flex items-center justify-between bg-slate-900 px-4 py-3 text-white">
+        <header className="lg:hidden flex items-center justify-between bg-orange-100 px-4 py-3 text-orange-900">
           <h1 className="text-lg font-bold">Quản lý hóa đơn</h1>
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-slate-800">
+              <Button variant="ghost" size="icon" className="text-orange-900 hover:bg-orange-200">
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
