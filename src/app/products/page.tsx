@@ -74,7 +74,7 @@ function ProductsContent() {
   const loadProducts = async () => {
     const data = await productService.getAll();
     // Sort by id descending (newest first)
-    const sorted = [...data].sort((a, b) => b.id - a.id);
+    const sorted = [...data].sort((a, b) => a.name.localeCompare(b.name));
     setProducts(sorted);
   };
 

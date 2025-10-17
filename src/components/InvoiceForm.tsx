@@ -347,7 +347,7 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
             <div className="grid grid-cols-1 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="product" className="text-sm font-medium">Sản phẩm</Label>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <Select
                     open={isProductSelectOpen}
                     onOpenChange={(open) => {
@@ -365,13 +365,14 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
                     value={newItem.productId}
                     onValueChange={(value) => setNewItem({ ...newItem, productId: value })}
                   >
-                    <SelectTrigger className="h-11 text-base min-w-[160px] w-1/2">
+                    <SelectTrigger className="h-11 text-base w-full sm:w-[200px]" style={{ height: '100%', maxWidth: 'calc(100% - 56px)' }}>
                       <SelectValue placeholder="Chọn sản phẩm" />
                     </SelectTrigger>
                     <SelectContent>
                       {/* Search input inside dropdown, above options */}
-                      <div className="p-2 sticky top-0 bg-popover">
+                      <div className="sticky top-0 z-10 bg-popover">
                         <Input
+                          style={{ zIndex: 1000 }}
                           id="productSearch"
                           ref={productSearchInputRef}
                           value={productSearch}
@@ -577,7 +578,7 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
               </div>
               <div className="flex justify-between text-lg lg:text-xl font-bold border-t pt-3 mt-2">
                 <span>Tổng cộng:</span>
-                <span className="text-green-600">{formatCurrency(total)}</span>
+                <span className="text-red-600">{formatCurrency(total)}</span>
               </div>
             </div>
 

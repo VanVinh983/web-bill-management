@@ -40,7 +40,7 @@ export default function CategoriesPage() {
   const loadCategories = async () => {
     const data = await categoryService.getAll();
     // Sort by id descending (newest first)
-    const sorted = [...data].sort((a, b) => b.id - a.id);
+    const sorted = [...data].sort((a, b) => a.name.localeCompare(b.name));
     setCategories(sorted);
   };
 
