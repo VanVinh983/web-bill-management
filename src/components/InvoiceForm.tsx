@@ -37,6 +37,7 @@ import { formatCurrency } from '@/lib/formatters';
 import { formatNumberInput, handleNumberInputChange } from '@/lib/numberFormat';
 import { Plus, Trash2, ArrowLeft, PackagePlus } from 'lucide-react';
 import { format } from 'date-fns';
+import { Textarea } from '@/components/ui/textarea';
 
 interface InvoiceFormProps {
   invoice?: Invoice;
@@ -58,6 +59,7 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
     customerAddress: invoice?.customerAddress || '',
     shipFee: invoice?.shipFee.toString() || '0',
     discountOrDeposit: invoice?.discountOrDeposit.toString() || '0',
+    note: invoice?.note || '',
   });
 
   const [items, setItems] = useState<InvoiceItem[]>(
@@ -253,6 +255,7 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
       discountOrDeposit: parseFloat(formData.discountOrDeposit) || 0,
       totalAmount: total,
       items,
+      note: formData.note || undefined,
     };
 
     try {
@@ -333,6 +336,17 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
                 onChange={(e) => setFormData({ ...formData, customerAddress: e.target.value })}
                 placeholder="Nhập địa chỉ khách hàng (không bắt buộc)"
                 className="h-11 lg:h-10 text-base"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="note" className="text-sm font-medium">Ghi chú</Label>
+              <Textarea
+                id="note"
+                value={formData.note}
+                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+                placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)"
+                className="min-h-20 text-base"
+                rows={3}
               />
             </div>
           </CardContent>

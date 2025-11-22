@@ -112,6 +112,12 @@ export default function InvoiceDetailPage() {
               <p className="text-xs lg:text-sm text-gray-500 mb-1">Địa chỉ</p>
               <p className="text-base lg:text-lg font-semibold">{invoice.customerAddress}</p>
             </div>
+            {invoice.note && (
+              <div className="col-span-1 sm:col-span-2">
+                <p className="text-xs lg:text-sm text-gray-500 mb-1">Ghi chú</p>
+                <p className="text-base lg:text-lg font-semibold whitespace-pre-wrap">{invoice.note}</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

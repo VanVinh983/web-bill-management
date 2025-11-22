@@ -36,5 +36,6 @@ export interface Invoice {
   discountOrDeposit: number;
   totalAmount: number;
   items: InvoiceItem[];
+  note?: string; // Optional note field
 }
 

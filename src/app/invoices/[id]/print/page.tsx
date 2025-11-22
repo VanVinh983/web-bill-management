@@ -1,20 +1,29 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Image from 'next/image';
+import { Nunito } from 'next/font/google';
 import { Button } from '@/components/ui/button';
 import { invoiceService } from '@/lib/invoiceService';
 import { Invoice } from '@/types/models';
 import { formatCurrency } from '@/lib/formatters';
 import { format } from 'date-fns';
-import { Printer, Share2, Facebook, Phone, Home, Calendar, User } from 'lucide-react';
+import { Share2, Facebook, Phone, Home, Calendar, User, Download, Notebook } from 'lucide-react';
+import { toPng } from 'html-to-image';
+
+const nunito = Nunito({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-nunito',
+});
 
 export default function PrintInvoicePage() {
   const router = useRouter();
   const params = useParams();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [isIOS, setIsIOS] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const invoiceRef = useRef<HTMLDivElement>(null);
 
   const formatOrderCode = (id: number) => id.toString().padStart(3, '0');
   
@@ -32,6 +41,15 @@ export default function PrintInvoicePage() {
       const checkIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
                        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       setIsIOS(checkIOS);
+
+      // Preload Nunito font from Google Fonts to avoid CORS issues when exporting
+      const fontLink = document.querySelector('link[href*="fonts.googleapis.com/css2?family=Nunito"]');
+      if (!fontLink) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap';
+        document.head.appendChild(link);
+      }
     }
   }, []);
 
@@ -104,6 +122,88 @@ export default function PrintInvoicePage() {
     }
   };
 
+  const handleExportImage = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (!invoiceRef.current || !invoice) {
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      // Ensure Nunito font is loaded from Google Fonts
+      let fontLink = document.querySelector('link[href*="fonts.googleapis.com/css2?family=Nunito"]') as HTMLLinkElement;
+      if (!fontLink) {
+        fontLink = document.createElement('link');
+        fontLink.rel = 'stylesheet';
+        fontLink.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800;900&display=swap';
+        document.head.appendChild(fontLink);
+      }
+
+      // Wait for fonts to load
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+      
+      // Check if Nunito font is loaded
+      const checkFont = async () => {
+        try {
+          await document.fonts.load('400 16px Nunito');
+          await document.fonts.load('700 16px Nunito');
+        } catch (e) {
+          console.warn('Font loading check failed:', e);
+        }
+      };
+      await checkFont();
+      
+      // Additional wait to ensure font is fully loaded and rendered
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Font is already loaded in the DOM, so html-to-image should use it
+      // We'll catch any CORS errors that might occur during font parsing
+      let dataUrl: string;
+      try {
+        dataUrl = await toPng(invoiceRef.current, {
+          quality: 1.0,
+          pixelRatio: 2,
+          backgroundColor: '#ffffff',
+          cacheBust: true,
+        });
+      } catch (error) {
+        // If there's a CORS error with fonts, try again with a longer wait
+        // The font should be fully loaded by now
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('cross-origin') || errorMessage.includes('stylesheet')) {
+          console.warn('Font CORS warning, retrying with font already loaded...');
+          await new Promise(resolve => setTimeout(resolve, 500));
+          dataUrl = await toPng(invoiceRef.current, {
+            quality: 1.0,
+            pixelRatio: 2,
+            backgroundColor: '#ffffff',
+            cacheBust: true,
+          });
+        } else {
+          throw error;
+        }
+      }
+
+      // Create download link
+      const link = document.createElement('a');
+      link.download = `hoa-don-${formatOrderCode(invoice.id)}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (error) {
+      console.error('Error exporting image:', error);
+      alert('Có lỗi xảy ra khi xuất hình ảnh. Vui lòng thử lại.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (!invoice) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -113,9 +213,15 @@ export default function PrintInvoicePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div 
+      className={`min-h-screen bg-white ${nunito.className}`}
+      style={{ fontFamily: "'Nunito', sans-serif" }}
+    >
       {/* Invoice Content */}
-      <div className="max-w-4xl mx-auto p-3 sm:p-4 print:p-4 space-y-4 sm:space-y-6 print:space-y-4">
+      <div 
+        ref={invoiceRef}
+        className="max-w-4xl mx-auto p-3 sm:p-4 print:p-4 space-y-4 sm:space-y-6 print:space-y-4"
+      >
         {/* Store Information Section - Separate Container */}
         <div 
           className="bg-white border-2 border-[#7c2d12] rounded-lg p-4 sm:p-6 print:p-6"
@@ -128,15 +234,8 @@ export default function PrintInvoicePage() {
           <div className="flex items-start gap-3">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2 sm:mb-3">
-                <Image 
-                  src="/logo.png" 
-                  alt="NGOCVY STORE Logo" 
-                  width={56}
-                  height={56}
-                  priority
-                />
-                <h1 className="text-4xl sm:text-5xl print:text-5xl font-extrabold text-[#7c2d12]">
-                  <b>NGOCVY STORE</b>
+                <h1 className="text-4xl sm:text-5xl print:text-5xl font-extrabold text-[#7c2d12] text-center mx-auto">
+                  <b className="text-center">NGOCVY STORE</b>
                 </h1>
               </div>
               <div className="p-2 sm:p-3 space-y-1.5 text-sm sm:text-base print:text-sm">
@@ -192,91 +291,113 @@ export default function PrintInvoicePage() {
           {/* Customer Info */}
           <div className="space-y-3 mt-3">
             <div className="flex items-center gap-2 text-base sm:text-lg print:text-base">
-              <Calendar className="h-5 w-5 text-gray-600 flex-shrink-0" />
-              <span className="text-gray-600 font-semibold">Ngày đặt:</span>
-              <span className="font-bold">{formatOrderDateTime(invoice.orderDate)}</span>
+              <Calendar className="h-5 w-5 text-[#7c2d12] flex-shrink-0" />
+              <span className="font-bold">Ngày đặt:</span>
+              <span>{formatOrderDateTime(invoice.orderDate)}</span>
             </div>
             <div className="flex items-center gap-2 text-base sm:text-lg print:text-base">
-              <User className="h-5 w-5 text-gray-600 flex-shrink-0" />
-              <span className="text-gray-600 font-semibold">FB:</span>
-              <span className="font-bold">{invoice.customerName}</span>
+              <User className="h-5 w-5 text-[#7c2d12] flex-shrink-0" />
+              <span className="font-bold">FB:</span>
+              <span>{invoice.customerName}</span>
             </div>
             {invoice.customerPhone && (
               <div className="flex items-center gap-2 text-base sm:text-lg print:text-base">
-                <Phone className="h-5 w-5 text-gray-600 flex-shrink-0" />
-                <span className="text-gray-600 font-semibold">SĐT:</span>
-                <span className="font-bold">{invoice.customerPhone}</span>
+                <Phone className="h-5 w-5 text-[#7c2d12] flex-shrink-0" />
+                <span className="font-bold">SĐT:</span>
+                <span>{invoice.customerPhone}</span>
               </div>
             )}
             {invoice.customerAddress && (
               <div className="flex items-start gap-2 text-base sm:text-lg print:text-base">
-                <Home className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-600 font-semibold">Địa chỉ:</span>
-                <span className="font-bold">{invoice.customerAddress}</span>
+                <Home className="h-5 w-5 text-[#7c2d12] flex-shrink-0 mt-0.5" />
+                <span className="font-bold">Địa chỉ:</span>
+                <span>{invoice.customerAddress}</span>
+              </div>
+            )}
+            {invoice.note && (
+              <div className="flex items-start gap-2 text-base sm:text-lg print:text-base">
+                <Notebook className="h-5 w-5 text-[#7c2d12] flex-shrink-0 mt-0.5" />
+                <span className="font-bold">Ghi chú:</span>
+                <span className="whitespace-pre-wrap">{invoice.note}</span>
               </div>
             )}
           </div>
 
-          {/* Mobile View - Cards */}
-          <div className="block sm:hidden print:hidden space-y-3 mt-6">
-            {invoice.items.map((item) => (
-              <div key={item.id} className="border border-[#7c2d12] rounded p-3 bg-white/50">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    <p className="text-base font-bold text-[#7c2d12]">{item.productName}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-3 pt-2 border-t border-[#7c2d12] text-sm">
-                  <div>
-                    <p className="text-gray-500 font-semibold">SL:</p>
-                    <p className="font-bold">{item.quantity}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-gray-500 font-semibold">Đơn giá:</p>
-                    <p className="font-bold">{formatCurrency(item.unitPrice)}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-gray-500 font-semibold">Thành tiền:</p>
-                    <p className="font-extrabold">{formatCurrency(item.subTotal)}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Desktop/Print View - Table */}
-          <div className="hidden sm:block">
-            <div className="overflow-x-auto print:overflow-visible">
-              <table className="w-full border-collapse">
+          {/* Mobile View - Table */}
+          <div className="block sm:hidden print:hidden mt-6">
+            <div className="overflow-x-auto">
+              <table className="w-full table-auto border-collapse">
                 <thead>
-                  <tr style={{ backgroundColor: 'rgba(243, 244, 246, 0.5)' }}>
-                    <th className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                  <tr className="bg-gray-100/50">
+                    <th className="border-y border-[#7c2d12] px-2 py-4 text-left text-xs font-bold text-[#7c2d12]">
                       SẢN PHẨM
                     </th>
-                    <th className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-center text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                    <th className="border-y border-[#7c2d12] px-2 py-4 text-center text-xs font-bold text-[#7c2d12]">
                       SL
                     </th>
-                    <th className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-right text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                    <th className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-bold text-[#7c2d12]">
                       ĐƠN GIÁ
                     </th>
-                    <th className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-right text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                    <th className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-bold text-[#7c2d12]">
                       THÀNH TIỀN
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {invoice.items.map((item) => (
-                    <tr key={item.id} style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
-                      <td className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base print:text-sm font-bold">
+                    <tr key={item.id} className="bg-white/50">
+                      <td className="border-y border-[#7c2d12] px-2 py-4 text-xs font-bold">
                         {item.productName}
                       </td>
-                      <td className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-center text-sm sm:text-base print:text-sm font-semibold">
+                      <td className="border-y border-[#7c2d12] px-2 py-4 text-center text-xs font-semibold">
                         {item.quantity}
                       </td>
-                      <td className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-right text-sm sm:text-base print:text-sm font-semibold">
+                      <td className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-semibold">
                         {formatCurrency(item.unitPrice)}
                       </td>
-                      <td className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-right text-sm sm:text-base print:text-sm font-extrabold">
+                      <td className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-extrabold">
+                        {formatCurrency(item.subTotal)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Desktop/Print View - Table */}
+          <div className="hidden sm:block">
+            <div className="overflow-x-auto print:overflow-visible">
+              <table className="w-full table-auto border-collapse">
+                <thead>
+                  <tr className="bg-gray-100/50">
+                    <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-left text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                      SẢN PHẨM
+                    </th>
+                    <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-center text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                      SL
+                    </th>
+                    <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                      ĐƠN GIÁ
+                    </th>
+                    <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                      THÀNH TIỀN
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoice.items.map((item) => (
+                    <tr key={item.id} className="bg-white/50">
+                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-sm sm:text-base print:text-sm font-bold">
+                        {item.productName}
+                      </td>
+                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-center text-sm sm:text-base print:text-sm font-semibold">
+                        {item.quantity}
+                      </td>
+                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-semibold">
+                        {formatCurrency(item.unitPrice)}
+                      </td>
+                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-extrabold">
                         {formatCurrency(item.subTotal)}
                       </td>
                     </tr>
@@ -330,7 +451,7 @@ export default function PrintInvoicePage() {
           </ul>
           </div>
         </div>
-      <p className="font-bold text-center" style={{ fontSize: '1rem' }}>CẢM ƠN VÌ SỰ LỰA CHỌN VÀ HẸN GẶP LẠI BẠN!</p>
+        <p className="font-bold text-center" style={{ fontSize: '1rem' }}>CẢM ƠN VÌ SỰ LỰA CHỌN VÀ HẸN GẶP LẠI BẠN!</p>
       </div>
       <div className="no-print p-3 sm:p-4 bg-gray-50 border-b">
         <div className="flex flex-col gap-2 sm:gap-3 justify-end">
@@ -349,12 +470,14 @@ export default function PrintInvoicePage() {
             )}
             <Button 
               type="button"
-              onClick={handlePrint}
+              variant="outline"
+              onClick={handleExportImage}
+              disabled={isExporting}
               className="flex-1 sm:flex-none h-10 touch-manipulation active:opacity-70 cursor-pointer"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <Printer className="h-4 w-4 mr-2" />
-              In hóa đơn
+              <Download className="h-4 w-4 mr-2" />
+              {isExporting ? 'Đang xuất...' : 'Tải hình ảnh'}
             </Button>
           </div>
         </div>
