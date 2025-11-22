@@ -274,11 +274,11 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
   return (
     <div>
       <div className="flex items-center gap-2 lg:gap-4 mb-4 lg:mb-8">
-        <Button variant="outline" onClick={() => router.push('/invoices')} size="sm" className="h-9 lg:h-10">
+        <Button variant="outline" onClick={() => router.push('/invoices')} size="sm" className="h-10 lg:h-10">
           <ArrowLeft className="h-4 w-4 mr-1 lg:mr-2" />
           <span className="hidden sm:inline">Quay lại</span>
         </Button>
-        <h1 className="text-xl lg:text-3xl font-bold text-gray-900">
+        <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-gray-900">
           {invoice ? 'Sửa hóa đơn' : 'Tạo hóa đơn mới'}
         </h1>
       </div>
@@ -286,10 +286,10 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
       <div className="grid gap-4 lg:gap-6">
         {/* Customer Information */}
         <Card>
-          <CardHeader className="p-4 lg:p-6">
-            <CardTitle className="text-base lg:text-lg">Thông tin khách hàng</CardTitle>
+          <CardHeader className="p-3 sm:p-4 lg:p-6">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Thông tin khách hàng</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-4 p-4 lg:p-6 pt-0">
+          <CardContent className="grid gap-3 sm:gap-4 p-3 sm:p-4 lg:p-6 pt-0">
             <div className="space-y-2">
               <Label htmlFor="customerName" className="text-sm font-medium">Tên khách hàng *</Label>
               <Input
@@ -340,10 +340,10 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
 
         {/* Products */}
         <Card>
-          <CardHeader className="p-4 lg:p-6">
-            <CardTitle className="text-base lg:text-lg">Sản phẩm</CardTitle>
+          <CardHeader className="p-3 sm:p-4 lg:p-6">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Sản phẩm</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 p-4 lg:p-6 pt-0">
+          <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4 lg:p-6 pt-0">
             <div className="grid grid-cols-1 gap-3">
               <div className="space-y-2">
                 <Label htmlFor="product" className="text-sm font-medium">Sản phẩm</Label>
@@ -532,10 +532,10 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
 
         {/* Total Calculation */}
         <Card>
-          <CardHeader className="p-4 lg:p-6">
-            <CardTitle className="text-base lg:text-lg">Thanh toán</CardTitle>
+          <CardHeader className="p-3 sm:p-4 lg:p-6">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Thanh toán</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 p-4 lg:p-6 pt-0">
+          <CardContent className="space-y-3 sm:space-y-4 p-3 sm:p-4 lg:p-6 pt-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="shipFee" className="text-sm font-medium">Phí ship</Label>

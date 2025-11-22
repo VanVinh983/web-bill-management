@@ -20,7 +20,10 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   // Don't show sidebar on login/register pages
   const isAuthPage = pathname === '/login' || pathname === '/register';
   
-  if (isAuthPage) {
+  // Don't show sidebar/header on print pages
+  const isPrintPage = pathname?.includes('/print');
+  
+  if (isAuthPage || isPrintPage) {
     return <>{children}</>;
   }
 
@@ -52,7 +55,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 p-4 lg:p-8">
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-3 sm:p-4 lg:p-8">
           {children}
         </main>
       </div>

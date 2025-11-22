@@ -76,10 +76,10 @@ export default function InvoicesPage() {
 
   return (
     <div>
-      <div className="flex flex-col gap-4 mb-4 lg:mb-8">
+      <div className="flex flex-col gap-3 sm:gap-4 mb-4 lg:mb-8">
         {/* Header */}
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl lg:text-3xl font-bold text-[var(--color-orange-900)]">Hóa đơn</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--color-orange-900)]">Hóa đơn</h1>
           <Button onClick={() => router.push('/invoices/new')} className="h-10">
             <Plus className="mr-1 lg:mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Tạo</span>
@@ -88,8 +88,8 @@ export default function InvoicesPage() {
 
         {/* Search and Filter Bar */}
         <Card className="shadow-sm">
-          <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <CardContent className="p-3 sm:p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 sm:gap-3">
               {/* Search Input */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -97,7 +97,7 @@ export default function InvoicesPage() {
                   placeholder="Tìm theo tên hoặc SĐT..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-10 text-base"
+                  className="pl-10 h-11 sm:h-10 text-base"
                 />
               </div>
 
@@ -109,7 +109,7 @@ export default function InvoicesPage() {
                   placeholder="Từ ngày"
                   value={dateFilter.startDate}
                   onChange={(e) => setDateFilter({ ...dateFilter, startDate: e.target.value })}
-                  className="pl-10 h-10 text-base"
+                  className="pl-10 h-11 sm:h-10 text-base"
                 />
               </div>
 
@@ -121,7 +121,7 @@ export default function InvoicesPage() {
                     placeholder="Đến ngày"
                     value={dateFilter.endDate}
                     onChange={(e) => setDateFilter({ ...dateFilter, endDate: e.target.value })}
-                    className="pl-10 h-10 text-base"
+                    className="pl-10 h-11 sm:h-10 text-base"
                   />
                 </div>
                 {hasActiveFilters && (
@@ -129,7 +129,7 @@ export default function InvoicesPage() {
                     variant="outline"
                     size="sm"
                     onClick={handleClearFilters}
-                    className="h-10 px-3"
+                    className="h-11 sm:h-10 px-3"
                     title="Xóa bộ lọc"
                   >
                     <X className="h-4 w-4" />
@@ -140,7 +140,7 @@ export default function InvoicesPage() {
 
             {/* Filter Summary */}
             {hasActiveFilters && (
-              <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+              <div className="mt-2 sm:mt-3 flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                 <span>Hiển thị {filteredInvoices.length} / {invoices.length} hóa đơn</span>
               </div>
             )}
@@ -171,14 +171,14 @@ export default function InvoicesPage() {
       ) : (
         <>
           {/* Mobile View - Cards */}
-          <div className="block lg:hidden space-y-3">
+          <div className="block lg:hidden space-y-2 sm:space-y-3">
             {filteredInvoices.map((invoice, index) => (
               <Card 
                 key={invoice.id} 
                 className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => router.push(`/invoices/${invoice.id}`)}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div>
@@ -207,7 +207,7 @@ export default function InvoicesPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => router.push(`/invoices/${invoice.id}`)}
-                        className="flex-1 h-9"
+                        className="flex-1 h-10"
                       >
                         <Eye className="h-4 w-4 mr-1" />
                         Xem
@@ -216,7 +216,7 @@ export default function InvoicesPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => router.push(`/invoices/${invoice.id}/edit`)}
-                        className="h-9 px-3"
+                        className="h-10 px-3"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -224,7 +224,7 @@ export default function InvoicesPage() {
                         variant={deleteConfirm === invoice.id ? 'destructive' : 'outline'}
                         size="sm"
                         onClick={() => handleDelete(invoice.id)}
-                        className="h-9 px-3"
+                        className="h-10 px-3"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

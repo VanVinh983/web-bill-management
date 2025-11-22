@@ -87,8 +87,8 @@ export default function CategoriesPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4 lg:mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-[var(--color-orange-900)]">Danh mục sản phẩm</h1>
-        <Button onClick={() => handleOpenDialog()} size="default" className="h-10 lg:h-10">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--color-orange-900)]">Danh mục sản phẩm</h1>
+        <Button onClick={() => handleOpenDialog()} size="default" className="h-11 sm:h-10 lg:h-10">
           <Plus className="mr-1 lg:mr-2 h-4 w-4" />
           <span className="hidden sm:inline">Thêm</span>
         </Button>
@@ -103,14 +103,14 @@ export default function CategoriesPage() {
       ) : (
         <>
           {/* Mobile View - Cards */}
-          <div className="block lg:hidden space-y-3">
+          <div className="block lg:hidden space-y-2 sm:space-y-3">
             {categories.map((category, index) => (
               <Card 
                 key={category.id} 
                 className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                 onClick={() => router.push(`/products?categoryId=${category.id}`)}
               >
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <p className="text-xs text-gray-500 mb-1">STT: {index + 1}</p>
@@ -121,7 +121,7 @@ export default function CategoriesPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleOpenDialog(category)}
-                        className="h-9 w-9 p-0"
+                        className="h-10 w-10 p-0"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -129,7 +129,7 @@ export default function CategoriesPage() {
                         variant={deleteConfirm === category.id ? 'destructive' : 'outline'}
                         size="sm"
                         onClick={() => handleDelete(category.id)}
-                        className="h-9 px-3"
+                        className="h-10 px-3"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

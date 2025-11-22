@@ -207,7 +207,7 @@ function ProductsContent() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 lg:mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-[var(--color-orange-900)]">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[var(--color-orange-900)]">
           Sản phẩm
         </h1>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -217,10 +217,10 @@ function ProductsContent() {
               placeholder="Tìm sản phẩm..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full sm:w-[200px] lg:w-[250px]"
+              className="h-11 sm:h-10 w-full sm:w-[200px] lg:w-[250px] text-base"
             />
             <Select value={filterCategoryId} onValueChange={setFilterCategoryId}>
-              <SelectTrigger className="h-10 w-[150px] sm:w-[180px]">
+              <SelectTrigger className="h-11 sm:h-10 w-[150px] sm:w-[180px] text-base">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Lọc danh mục" />
               </SelectTrigger>
@@ -234,7 +234,7 @@ function ProductsContent() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={() => handleOpenDialog()} className="h-10 w-full sm:w-auto">
+          <Button onClick={() => handleOpenDialog()} className="h-11 sm:h-10 w-full sm:w-auto">
             <Plus className="mr-1 lg:mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Thêm</span>
           </Button>
@@ -255,10 +255,10 @@ function ProductsContent() {
       ) : (
         <>
           {/* Mobile View */}
-          <div className="block lg:hidden space-y-3">
+          <div className="block lg:hidden space-y-2 sm:space-y-3">
             {filteredProducts.map((product, index) => (
               <Card key={product.id} className="shadow-sm hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
+                <CardContent className="p-3 sm:p-4">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -298,7 +298,7 @@ function ProductsContent() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleOpenDialog(product)}
-                        className="flex-1 h-9"
+                        className="flex-1 h-10"
                       >
                         <Pencil className="h-4 w-4 mr-1" />
                         Sửa
@@ -307,7 +307,7 @@ function ProductsContent() {
                         variant={deleteConfirm === product.id ? 'destructive' : 'outline'}
                         size="sm"
                         onClick={() => handleDelete(product.id)}
-                        className="flex-1 h-9"
+                        className="flex-1 h-10"
                       >
                         <Trash2 className="h-4 w-4 mr-1" />
                         {deleteConfirm === product.id ? 'Xác nhận?' : 'Xóa'}

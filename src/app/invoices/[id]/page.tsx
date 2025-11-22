@@ -16,7 +16,7 @@ import {
 import { invoiceService } from '@/lib/invoiceService';
 import { Invoice } from '@/types/models';
 import { formatCurrency, formatDateTime } from '@/lib/formatters';
-import { ArrowLeft, Pencil } from 'lucide-react';
+import { ArrowLeft, Pencil, Printer } from 'lucide-react';
 
 export default function InvoiceDetailPage() {
   const router = useRouter();
@@ -50,26 +50,48 @@ export default function InvoiceDetailPage() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 lg:mb-8">
-        <div className="flex items-center gap-2 lg:gap-4">
-          <Button variant="outline" size="sm" onClick={() => router.push('/invoices')} className="h-9 lg:h-10">
+      <div className="flex flex-col justify-between items-start gap-3 mb-4 lg:mb-8">
+        <div className="flex items-center gap-2 lg:gap-4 w-full">
+          <Button variant="outline" size="sm" onClick={() => router.push('/invoices')} className="h-10 lg:h-10">
             <ArrowLeft className="h-4 w-4 mr-1 lg:mr-2" />
             <span className="hidden sm:inline">Quay lại</span>
           </Button>
-          <h1 className="text-xl lg:text-2xl font-extrabold text-red-600">Mã đơn: {formatOrderCode(invoice.id)}</h1>
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-red-600">Mã đơn: {formatOrderCode(invoice.id)}</h1>
         </div>
-        <Button onClick={() => router.push(`/invoices/${invoice.id}/edit`)} className="h-9 lg:h-10 w-full sm:w-auto">
-          <Pencil className="h-4 w-4 mr-2" />
-          Sửa
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button 
+            type="button"
+            variant="outline" 
+            onClick={() => {
+              router.push(`/invoices/${invoice.id}/print`);
+            }} 
+            className="flex-1 sm:flex-none h-10 lg:h-10 touch-manipulation active:opacity-70 cursor-pointer"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+          >
+            <Printer className="h-4 w-4 mr-2" />
+            In hóa đơn
+          </Button>
+          <Button 
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              router.push(`/invoices/${invoice.id}/edit`);
+            }} 
+            className="flex-1 sm:flex-none h-10 lg:h-10 touch-manipulation"
+          >
+            <Pencil className="h-4 w-4 mr-2" />
+            Sửa
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 lg:gap-6">
         <Card>
-          <CardHeader className="p-4 lg:p-6">
-            <CardTitle className="text-base lg:text-lg">Thông tin hóa đơn</CardTitle>
+          <CardHeader className="p-3 sm:p-4 lg:p-6">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Thông tin hóa đơn</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 lg:p-6 pt-0">
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 lg:p-6 pt-0">
             <div>
               <p className="text-xs lg:text-sm text-gray-500 mb-1">Mã đơn hàng</p>
               <p className="text-2xl lg:text-4xl font-extrabold text-red-600">{formatOrderCode(invoice.id)}</p>
@@ -94,10 +116,10 @@ export default function InvoiceDetailPage() {
         </Card>
 
         <Card>
-          <CardHeader className="p-4 lg:p-6">
-            <CardTitle className="text-base lg:text-lg">Danh sách sản phẩm</CardTitle>
+          <CardHeader className="p-3 sm:p-4 lg:p-6">
+            <CardTitle className="text-sm sm:text-base lg:text-lg">Danh sách sản phẩm</CardTitle>
           </CardHeader>
-          <CardContent className="p-4 lg:p-6 pt-0">
+          <CardContent className="p-3 sm:p-4 lg:p-6 pt-0">
             {/* Mobile View - Cards */}
             <div className="block lg:hidden space-y-3">
               {invoice.items.map((item) => (
