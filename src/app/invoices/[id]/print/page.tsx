@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { invoiceService } from '@/lib/invoiceService';
 import { Invoice } from '@/types/models';
 import { formatCurrency } from '@/lib/formatters';
 import { format } from 'date-fns';
-import { ArrowLeft, Printer, Share2, Facebook, Phone, Home, Calendar, User } from 'lucide-react';
+import { Printer, Share2, Facebook, Phone, Home, Calendar, User } from 'lucide-react';
 
 export default function PrintInvoicePage() {
   const router = useRouter();
@@ -119,31 +120,49 @@ export default function PrintInvoicePage() {
         <div 
           className="bg-white border-2 border-[#7c2d12] rounded-lg p-4 sm:p-6 print:p-6"
           style={{
-            backgroundImage: 'url(/background-invoice.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
           }}
         >
-          <div className="flex items-start gap-3 mb-3">
+          <div className="flex items-start gap-3">
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl print:text-2xl font-bold text-[#7c2d12] mb-2 sm:mb-3">
-                NGOCVY STORE
-              </h1>
-              <div className="border border-[#7c2d12] rounded-lg p-2 sm:p-3 space-y-1.5 text-xs sm:text-sm print:text-xs">
+              <div className="flex items-center gap-3 mb-2 sm:mb-3">
+                <Image 
+                  src="/logo.png" 
+                  alt="NGOCVY STORE Logo" 
+                  width={56}
+                  height={56}
+                  priority
+                />
+                <h1 className="text-4xl sm:text-5xl print:text-5xl font-extrabold text-[#7c2d12]">
+                  <b>NGOCVY STORE</b>
+                </h1>
+              </div>
+              <div className="p-2 sm:p-3 space-y-1.5 text-sm sm:text-base print:text-sm">
                 <div className="flex items-center gap-2 text-[#7c2d12]">
-                  <Facebook className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span>Ngọc Vy (Store)</span>
+                  <Facebook className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  <span className="font-bold">Ngọc Vy (Store)</span>
                 </div>
                 <div className="flex items-center gap-2 text-[#7c2d12]">
-                  <Phone className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span>0777809378 (Zalo sỉ)</span>
+                  <Phone className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  <span className="font-bold">0777809378 (Zalo sỉ)</span>
                 </div>
                 <div className="flex items-start gap-2 text-[#7c2d12]">
-                  <Home className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 mt-0.5" />
+                  <Home className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p>Số 14 Phạm Ngũ Lão, TT.Cái Dầu, H.Châu Phú, T.An Giang</p>
-                    <p className="text-[#7c2d12]/70 mt-0.5">[Search Maps Ngọc Vy Cái Dầu]</p>
+                    <p className="font-bold">958/3 Âu Cơ, P.14, Q.Tân Bình, TPHCM</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-[#7c2d12]">
+                  <Home className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold">
+                      Số 14 Phạm Ngũ Lão, TT.Cái Dầu, H.Châu Phú, T.An Giang 
+                      <span className="text-[#7c2d12]/70 mt-0.5 text-xs italic font-bold ml-1">
+                        [Search Maps Ngọc Vy Cái Dầu]
+                      </span>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -153,73 +172,72 @@ export default function PrintInvoicePage() {
 
         {/* Invoice Header & Customer Info Section */}
         <div 
-          className="bg-white border-2 border-[#7c2d12] rounded-lg p-4 sm:p-6 print:p-6"
+          className="bg-white border-2 border-[#7c2d12] rounded-lg p-5 sm:p-8 print:p-8 relative"
           style={{
-            backgroundImage: 'url(/background-invoice.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
           }}
         >
+          <div 
+            className="absolute inset-0 bg-white/60 rounded-lg pointer-events-none"
+            style={{ zIndex: 0 }}
+          ></div>
+          <div className="relative z-10">
           {/* Invoice Header */}
-          <div className="text-center mb-4 sm:mb-6 print:mb-6">
-            <h2 className="text-lg sm:text-xl print:text-xl font-bold text-red-600 mb-2">
-              HÓA ĐƠN BÁN HÀNG
-            </h2>
-            <p className="text-base sm:text-lg print:text-base text-gray-700">
-              Mã đơn: <span className="font-bold text-lg sm:text-xl print:text-lg text-red-600">{formatOrderCode(invoice.id)}</span>
-            </p>
-          </div>
+          <p className="text-xl sm:text-2xl print:text-xl text-red-600 text-left font-bold">
+            MÃ ĐƠN HÀNG: {formatOrderCode(invoice.id)}
+          </p>
 
           {/* Customer Info */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm sm:text-base print:text-sm">
-              <Calendar className="h-4 w-4 text-gray-600 flex-shrink-0" />
-              <span className="text-gray-600">Ngày đặt:</span>
-              <span className="font-semibold">{formatOrderDateTime(invoice.orderDate)}</span>
+          <div className="space-y-3 mt-3">
+            <div className="flex items-center gap-2 text-base sm:text-lg print:text-base">
+              <Calendar className="h-5 w-5 text-gray-600 flex-shrink-0" />
+              <span className="text-gray-600 font-semibold">Ngày đặt:</span>
+              <span className="font-bold">{formatOrderDateTime(invoice.orderDate)}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm sm:text-base print:text-sm">
-              <User className="h-4 w-4 text-gray-600 flex-shrink-0" />
-              <span className="text-gray-600">FB:</span>
-              <span className="font-semibold">{invoice.customerName}</span>
+            <div className="flex items-center gap-2 text-base sm:text-lg print:text-base">
+              <User className="h-5 w-5 text-gray-600 flex-shrink-0" />
+              <span className="text-gray-600 font-semibold">FB:</span>
+              <span className="font-bold">{invoice.customerName}</span>
             </div>
             {invoice.customerPhone && (
-              <div className="flex items-center gap-2 text-sm sm:text-base print:text-sm">
-                <Phone className="h-4 w-4 text-gray-600 flex-shrink-0" />
-                <span className="text-gray-600">SĐT:</span>
-                <span className="font-semibold">{invoice.customerPhone}</span>
+              <div className="flex items-center gap-2 text-base sm:text-lg print:text-base">
+                <Phone className="h-5 w-5 text-gray-600 flex-shrink-0" />
+                <span className="text-gray-600 font-semibold">SĐT:</span>
+                <span className="font-bold">{invoice.customerPhone}</span>
               </div>
             )}
             {invoice.customerAddress && (
-              <div className="flex items-start gap-2 text-sm sm:text-base print:text-sm">
-                <Home className="h-4 w-4 text-gray-600 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-600">Địa chỉ:</span>
-                <span className="font-semibold">{invoice.customerAddress}</span>
+              <div className="flex items-start gap-2 text-base sm:text-lg print:text-base">
+                <Home className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                <span className="text-gray-600 font-semibold">Địa chỉ:</span>
+                <span className="font-bold">{invoice.customerAddress}</span>
               </div>
             )}
           </div>
 
           {/* Mobile View - Cards */}
-          <div className="block sm:hidden print:hidden space-y-2 mt-4">
+          <div className="block sm:hidden print:hidden space-y-3 mt-6">
             {invoice.items.map((item) => (
-              <div key={item.id} className="border border-[#7c2d12] rounded p-2 bg-white/50">
-                <div className="flex justify-between items-start mb-1">
+              <div key={item.id} className="border border-[#7c2d12] rounded p-3 bg-white/50">
+                <div className="flex justify-between items-start mb-2">
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-[#7c2d12]">{item.productName}</p>
+                    <p className="text-base font-bold text-[#7c2d12]">{item.productName}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#7c2d12] text-xs">
+                <div className="grid grid-cols-3 gap-3 pt-2 border-t border-[#7c2d12] text-sm">
                   <div>
-                    <p className="text-gray-500">SL:</p>
-                    <p className="font-medium">{item.quantity}</p>
+                    <p className="text-gray-500 font-semibold">SL:</p>
+                    <p className="font-bold">{item.quantity}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-gray-500">Đơn giá:</p>
-                    <p className="font-medium">{formatCurrency(item.unitPrice)}</p>
+                    <p className="text-gray-500 font-semibold">Đơn giá:</p>
+                    <p className="font-bold">{formatCurrency(item.unitPrice)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-gray-500">Thành tiền:</p>
-                    <p className="font-semibold">{formatCurrency(item.subTotal)}</p>
+                    <p className="text-gray-500 font-semibold">Thành tiền:</p>
+                    <p className="font-extrabold">{formatCurrency(item.subTotal)}</p>
                   </div>
                 </div>
               </div>
@@ -232,16 +250,16 @@ export default function PrintInvoicePage() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr style={{ backgroundColor: 'rgba(243, 244, 246, 0.5)' }}>
-                    <th className="border border-[#7c2d12] px-2 sm:px-3 py-1.5 sm:py-2 text-left text-xs sm:text-sm print:text-xs font-semibold text-[#7c2d12]">
+                    <th className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-left text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
                       SẢN PHẨM
                     </th>
-                    <th className="border border-[#7c2d12] px-2 sm:px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm print:text-xs font-semibold text-[#7c2d12]">
+                    <th className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-center text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
                       SL
                     </th>
-                    <th className="border border-[#7c2d12] px-2 sm:px-3 py-1.5 sm:py-2 text-right text-xs sm:text-sm print:text-xs font-semibold text-[#7c2d12]">
+                    <th className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-right text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
                       ĐƠN GIÁ
                     </th>
-                    <th className="border border-[#7c2d12] px-2 sm:px-3 py-1.5 sm:py-2 text-right text-xs sm:text-sm print:text-xs font-semibold text-[#7c2d12]">
+                    <th className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-right text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
                       THÀNH TIỀN
                     </th>
                   </tr>
@@ -249,16 +267,16 @@ export default function PrintInvoicePage() {
                 <tbody>
                   {invoice.items.map((item) => (
                     <tr key={item.id} style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}>
-                      <td className="border border-[#7c2d12] px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm print:text-xs font-medium">
+                      <td className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base print:text-sm font-bold">
                         {item.productName}
                       </td>
-                      <td className="border border-[#7c2d12] px-2 sm:px-3 py-1.5 sm:py-2 text-center text-xs sm:text-sm print:text-xs">
+                      <td className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-center text-sm sm:text-base print:text-sm font-semibold">
                         {item.quantity}
                       </td>
-                      <td className="border border-[#7c2d12] px-2 sm:px-3 py-1.5 sm:py-2 text-right text-xs sm:text-sm print:text-xs">
+                      <td className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-right text-sm sm:text-base print:text-sm font-semibold">
                         {formatCurrency(item.unitPrice)}
                       </td>
-                      <td className="border border-[#7c2d12] px-2 sm:px-3 py-1.5 sm:py-2 text-right text-xs sm:text-sm print:text-xs font-semibold">
+                      <td className="border border-[#7c2d12] px-3 sm:px-4 py-2 sm:py-3 text-right text-sm sm:text-base print:text-sm font-extrabold">
                         {formatCurrency(item.subTotal)}
                       </td>
                     </tr>
@@ -267,45 +285,52 @@ export default function PrintInvoicePage() {
               </table>
             </div>
           </div>
-          <div className="ml-auto max-w-full sm:max-w-xs mt-4">
-            <div className="space-y-1.5 sm:space-y-2 print:space-y-1 text-right">
-              <div className="flex justify-between text-xs sm:text-sm print:text-xs">
-                <span className="text-[#7c2d12] font-semibold">PHÍ SHIP:</span>
-                <span className="font-semibold">{formatCurrency(invoice.shipFee)}</span>
+          <div
+            className="ml-auto mt-6"
+            style={{ width: '70%' }}
+          >
+            <div className="space-y-2 sm:space-y-3 print:space-y-2 text-right">
+              <div className="flex justify-between text-sm sm:text-base print:text-sm">
+                <span className="text-[#7c2d12] font-bold">PHÍ SHIP:</span>
+                <span className="font-bold">{formatCurrency(invoice.shipFee)}</span>
               </div>
-              <div className="flex justify-between text-xs sm:text-sm print:text-xs">
-                <span className="text-[#7c2d12] font-semibold">GIẢM GIÁ/CỌC:</span>
-                <span className="font-semibold text-red-600">
+              <div className="flex justify-between text-sm sm:text-base print:text-sm">
+                <span className="text-[#7c2d12] font-bold">GIẢM GIÁ/CỌC:</span>
+                <span className="font-bold text-red-600">
                   -{formatCurrency(invoice.discountOrDeposit)}
                 </span>
               </div>
-              <div className="border-t border-[#7c2d12] pt-2 mt-2"></div>
-              <div className="flex justify-between text-base sm:text-lg print:text-base font-bold text-[#7c2d12]">
-                <span>TỔNG CỘNG:</span>
-                <span>{formatCurrency(invoice.totalAmount)}</span>
+              <div className="border-t border-[#7c2d12] pt-3 mt-3"></div>
+              <div className="flex justify-between text-sm sm:text-base print:text-sm">
+                <span className="text-[#7c2d12] font-bold" style={{fontSize: '1.1rem'}}>TỔNG CỘNG:</span>
+                <span className="font-bold" style={{fontSize: '1.1rem'}}>{formatCurrency(invoice.totalAmount)}</span>
               </div>
             </div>
           </div>
-          <h3 className="text-sm sm:text-base print:text-sm font-bold text-[#7c2d12] mb-2 mt-6">
+          <h3 className="font-extrabold text-[#7c2d12] mb-3 mt-10" style={{ fontSize: '1.1rem' }}>
             THÔNG TIN TÀI KHOẢN
           </h3>
-          <div className="space-y-1 text-xs sm:text-sm print:text-xs text-[#7c2d12]">
-            <p><span className="font-semibold">STK:</span> 1049639535</p>
-            <p><span className="font-semibold">Ngân hàng:</span> VCB (Vietcombank)</p>
-            <p><span className="font-semibold">Chủ sở hữu:</span> TRƯƠNG NGỌC THÚY VY</p>
-            <p><span className="font-semibold">MOMO:</span> 0777809378</p>
+          <div className="space-y-2 text-sm sm:text-base print:text-sm text-[#7c2d12]">
+            <p><span className="font-bold">STK:</span> 1049639535</p>
+            <p><span className="font-bold">Ngân hàng:</span> VCB (Vietcombank)</p>
+            <p><span className="font-bold">Chủ sở hữu:</span> TRƯƠNG NGỌC THÚY VY</p>
+            <p><span className="font-bold">MOMO:</span> 0777809378</p>
+            <p className="font-bold">NHẬN THANH TOÁN TIỀN HÀNG VÍ TRẢ SAU MOMO</p>
+            <p className="font-bold">NHẬN RÚT TIỀN VÍ TRẢ SAU MOMO (Có phí)</p>
+                  
           </div>
-          <h3 className="text-sm sm:text-base print:text-sm font-bold text-[#7c2d12] mb-2">
-            Lưu ý:
+          <h3 className="font-extrabold text-[#7c2d12] mb-3 mt-10" style={{ fontSize: '1.1rem' }}>
+            LƯU Ý:
           </h3>
-          <ul className="space-y-1 text-xs sm:text-sm print:text-xs text-[#7c2d12] list-disc list-inside">
-            <li>Đơn hàng giữ tối đa 3 ngày, sau đó sẽ hủy nếu chưa chuyển khoản.</li>
-            <li>Chuyển khoản xong vui lòng gửi ảnh chụp màn hình để xác nhận.</li>
-            <li>Hàng sẽ được gửi sau 1-2 ngày làm việc kể từ khi xác nhận thanh toán.</li>
-            <li>Vui lòng kiểm tra hàng khi nhận, shop không chịu trách nhiệm sau khi khách đã nhận hàng.</li>
-            <li>Không hỗ trợ đổi trả, chỉ đổi size nếu còn hàng.</li>
+          <ul className="space-y-1.5 text-sm sm:text-base print:text-sm text-[#7c2d12] list-disc list-inside font-medium">
+            <li>Giữ đơn tối đa 1 tuần kể từ khi có hàng</li>
+            <li>CK tiền hàng = Giữ đơn dài hạn (Áp dụng cho ĐH gửi ĐVVC & Khách đến Shop lấy)</li>
+            <li>Đơn gửi ĐVVC: CK trước tiền hàng Shop hỗ trợ phí ship 5k - 15k</li>
+            <li>Được đồng kiểm</li>
           </ul>
+          </div>
         </div>
+      <p className="font-bold text-center" style={{ fontSize: '1rem' }}>CẢM ƠN VÌ SỰ LỰA CHỌN VÀ HẸN GẶP LẠI BẠN!</p>
       </div>
       <div className="no-print p-3 sm:p-4 bg-gray-50 border-b">
         <div className="flex flex-col gap-2 sm:gap-3 justify-end">
