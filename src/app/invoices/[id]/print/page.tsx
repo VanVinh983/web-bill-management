@@ -29,7 +29,7 @@ export default function PrintInvoicePage() {
   
   const formatOrderDateTime = (dateString: string): string => {
     try {
-      return format(new Date(dateString), 'dd/MM/yyyy - HH:mm:ss');
+      return format(new Date(dateString), 'dd/MM/yyyy');
     } catch {
       return dateString;
     }
@@ -297,7 +297,7 @@ export default function PrintInvoicePage() {
             </div>
             <div className="flex items-center gap-2 text-base sm:text-lg print:text-base">
               <User className="h-5 w-5 text-[#7c2d12] flex-shrink-0" />
-              <span className="font-bold">FB:</span>
+              <span className="font-bold">Tên:</span>
               <span>{invoice.customerName}</span>
             </div>
             {invoice.customerPhone && (
@@ -310,15 +310,15 @@ export default function PrintInvoicePage() {
             {invoice.customerAddress && (
               <div className="flex items-start gap-2 text-base sm:text-lg print:text-base">
                 <Home className="h-5 w-5 text-[#7c2d12] flex-shrink-0 mt-0.5" />
-                <span className="font-bold">Địa chỉ:</span>
-                <span>{invoice.customerAddress}</span>
+                <span className="font-bold flex-shrink-0">Địa chỉ:</span>
+                <span className="break-words flex-1 min-w-0" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>{invoice.customerAddress}</span>
               </div>
             )}
             {invoice.note && (
               <div className="flex items-start gap-2 text-base sm:text-lg print:text-base">
                 <Notebook className="h-5 w-5 text-[#7c2d12] flex-shrink-0 mt-0.5" />
-                <span className="font-bold">Ghi chú:</span>
-                <span className="whitespace-pre-wrap">{invoice.note}</span>
+                <span className="font-bold flex-shrink-0">Ghi chú:</span>
+                <span className="whitespace-pre-wrap break-words flex-1 min-w-0" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>{invoice.note}</span>
               </div>
             )}
           </div>
@@ -332,13 +332,13 @@ export default function PrintInvoicePage() {
                     <th className="border-y border-[#7c2d12] px-2 py-4 text-left text-xs font-bold text-[#7c2d12]">
                       SẢN PHẨM
                     </th>
-                    <th className="border-y border-[#7c2d12] px-2 py-4 text-center text-xs font-bold text-[#7c2d12]">
+                    <th className="border-y border-[#7c2d12] px-2 py-4 text-center text-xs font-bold text-[#7c2d12]" style={{ width: '40px' }}>
                       SL
                     </th>
-                    <th className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-bold text-[#7c2d12]">
+                    <th className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-bold text-[#7c2d12]" style={{ width: '60px' }}>
                       ĐƠN GIÁ
                     </th>
-                    <th className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-bold text-[#7c2d12]">
+                    <th className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-bold text-[#7c2d12]" style={{ width: '100px' }}>
                       THÀNH TIỀN
                     </th>
                   </tr>
@@ -346,16 +346,16 @@ export default function PrintInvoicePage() {
                 <tbody>
                   {invoice.items.map((item) => (
                     <tr key={item.id} className="bg-white/50">
-                      <td className="border-y border-[#7c2d12] px-2 py-4 text-xs font-bold">
+                      <td className="border-y border-[#7c2d12] px-2 py-4 text-xs font-bold break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                         {item.productName}
                       </td>
-                      <td className="border-y border-[#7c2d12] px-2 py-4 text-center text-xs font-semibold">
+                      <td className="border-y border-[#7c2d12] px-2 py-4 text-center text-xs font-semibold" style={{ width: '40px' }}>
                         {item.quantity}
                       </td>
-                      <td className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-semibold">
+                      <td className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-semibold" style={{ width: '60px' }}>
                         {formatCurrency(item.unitPrice)}
                       </td>
-                      <td className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-extrabold">
+                      <td className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-extrabold" style={{ width: '100px' }}>
                         {formatCurrency(item.subTotal)}
                       </td>
                     </tr>
@@ -374,13 +374,13 @@ export default function PrintInvoicePage() {
                     <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-left text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
                       SẢN PHẨM
                     </th>
-                    <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-center text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                    <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-center text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]" style={{ width: '80px' }}>
                       SL
                     </th>
-                    <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                    <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]" style={{ width: '130px' }}>
                       ĐƠN GIÁ
                     </th>
-                    <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]">
+                    <th className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-bold text-[#7c2d12]" style={{ width: '150px' }}>
                       THÀNH TIỀN
                     </th>
                   </tr>
@@ -388,16 +388,16 @@ export default function PrintInvoicePage() {
                 <tbody>
                   {invoice.items.map((item) => (
                     <tr key={item.id} className="bg-white/50">
-                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-sm sm:text-base print:text-sm font-bold">
+                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-sm sm:text-base print:text-sm font-bold break-words" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                         {item.productName}
                       </td>
-                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-center text-sm sm:text-base print:text-sm font-semibold">
+                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-center text-sm sm:text-base print:text-sm font-semibold" style={{ width: '80px' }}>
                         {item.quantity}
                       </td>
-                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-semibold">
+                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-semibold" style={{ width: '130px' }}>
                         {formatCurrency(item.unitPrice)}
                       </td>
-                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-extrabold">
+                      <td className="border-y border-[#7c2d12] px-3 sm:px-4 py-4 sm:py-5 text-right text-sm sm:text-base print:text-sm font-extrabold" style={{ width: '150px' }}>
                         {formatCurrency(item.subTotal)}
                       </td>
                     </tr>
