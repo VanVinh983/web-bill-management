@@ -183,13 +183,13 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
     }
 
     const salePrice = parseFloat(quickProductForm.salePrice);
-    if (isNaN(salePrice) || salePrice <= 0) {
+    if (isNaN(salePrice) || salePrice < 0) {
       alert('Vui lòng nhập giá bán hợp lệ');
       return;
     }
 
     const costPrice = parseFloat(quickProductForm.costPrice);
-    if (isNaN(costPrice) || costPrice <= 0) {
+    if (isNaN(costPrice) || costPrice < 0) {
       alert('Vui lòng nhập giá gốc hợp lệ');
       return;
     }
@@ -246,7 +246,7 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
 
     const { total } = calculateTotals();
 
-    const invoiceData = {
+    const invoiceData: Omit<Invoice, 'id'> = {
       orderDate: new Date(formData.orderDate).toISOString(),
       customerName: formData.customerName,
       customerPhone: formData.customerPhone,
@@ -255,7 +255,9 @@ export function InvoiceForm({ invoice }: InvoiceFormProps) {
       discountOrDeposit: parseFloat(formData.discountOrDeposit) || 0,
       totalAmount: total,
       items,
-      note: formData.note || undefined,
+      // Only add note if it has a value (Firestore doesn't accept undefined)
+      // If note is empty, don't include it in the object
+      ...(formData.note && formData.note.trim() ? { note: formData.note.trim() } : {}),
     };
 
     try {

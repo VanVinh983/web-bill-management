@@ -6,7 +6,11 @@
  * Format number to xxx.xxx format (e.g., 1000000 -> 1.000.000)
  */
 export function formatNumberInput(value: number | string): string {
-  if (!value && value !== 0) return '';
+  // Handle empty string or null/undefined
+  if (value === '' || value === null || value === undefined) return '';
+  
+  // Handle string '0' or number 0
+  if (value === '0' || value === 0) return '0';
   
   const numValue = typeof value === 'string' ? parseFloat(value.replace(/\./g, '')) : value;
   
@@ -37,8 +41,20 @@ export function handleNumberInputChange(
   // Remove all dots first
   const cleaned = value.replace(/\./g, '');
   
-  // Only allow digits
-  if (cleaned && !/^\d+$/.test(cleaned)) {
+  // Allow empty string (user is clearing the field)
+  if (cleaned === '') {
+    onChange('');
+    return;
+  }
+  
+  // Allow '0' explicitly
+  if (cleaned === '0') {
+    onChange('0');
+    return;
+  }
+  
+  // Only allow digits for other values
+  if (!/^\d+$/.test(cleaned)) {
     return;
   }
   

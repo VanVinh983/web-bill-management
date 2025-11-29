@@ -297,27 +297,23 @@ export default function PrintInvoicePage() {
             </div>
             <div className="flex items-center gap-2 text-base sm:text-lg print:text-base">
               <User className="h-5 w-5 text-[#7c2d12] flex-shrink-0" />
-              <span className="font-bold">Tên:</span>
               <span>{invoice.customerName}</span>
             </div>
             {invoice.customerPhone && (
               <div className="flex items-center gap-2 text-base sm:text-lg print:text-base">
                 <Phone className="h-5 w-5 text-[#7c2d12] flex-shrink-0" />
-                <span className="font-bold">SĐT:</span>
                 <span>{invoice.customerPhone}</span>
               </div>
             )}
             {invoice.customerAddress && (
               <div className="flex items-start gap-2 text-base sm:text-lg print:text-base">
                 <Home className="h-5 w-5 text-[#7c2d12] flex-shrink-0 mt-0.5" />
-                <span className="font-bold flex-shrink-0">Địa chỉ:</span>
                 <span className="break-words flex-1 min-w-0" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>{invoice.customerAddress}</span>
               </div>
             )}
             {invoice.note && (
               <div className="flex items-start gap-2 text-base sm:text-lg print:text-base">
                 <Notebook className="h-5 w-5 text-[#7c2d12] flex-shrink-0 mt-0.5" />
-                <span className="font-bold flex-shrink-0">Ghi chú:</span>
                 <span className="whitespace-pre-wrap break-words flex-1 min-w-0" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>{invoice.note}</span>
               </div>
             )}
@@ -335,7 +331,7 @@ export default function PrintInvoicePage() {
                     <th className="border-y border-[#7c2d12] px-2 py-4 text-center text-xs font-bold text-[#7c2d12]" style={{ width: '40px' }}>
                       SL
                     </th>
-                    <th className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-bold text-[#7c2d12]" style={{ width: '60px' }}>
+                    <th className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-bold text-[#7c2d12]" style={{ width: '70px' }}>
                       ĐƠN GIÁ
                     </th>
                     <th className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-bold text-[#7c2d12]" style={{ width: '100px' }}>
@@ -352,7 +348,7 @@ export default function PrintInvoicePage() {
                       <td className="border-y border-[#7c2d12] px-2 py-4 text-center text-xs font-semibold" style={{ width: '40px' }}>
                         {item.quantity}
                       </td>
-                      <td className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-semibold" style={{ width: '60px' }}>
+                      <td className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-semibold" style={{ width: '70px' }}>
                         {formatCurrency(item.unitPrice)}
                       </td>
                       <td className="border-y border-[#7c2d12] px-2 py-4 text-right text-xs font-extrabold" style={{ width: '100px' }}>
